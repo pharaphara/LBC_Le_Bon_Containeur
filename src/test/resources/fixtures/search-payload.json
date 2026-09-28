@@ -1,0 +1,26 @@
+{
+ "filters": {
+  "enums": {
+   "ad_type": [
+    "offer"
+   ],
+   "fuel": [
+    "4"
+   ]
+  },
+  "category": {
+   "id": "2"
+  },
+  "location": {
+   "locations": [
+    {
+     "locationType": "department",
+     "department_id": "12"
+    }
+   ]
+  }
+ },
+ "sort_by": "relevance",
+ "limit": 35,
+ "inject_alu": true
+}

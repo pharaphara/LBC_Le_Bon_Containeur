@@ -1,0 +1,21 @@
+{
+  "_note": "Category ids are MEASURED, not copied. The site returns category_name on every ad, so an id is only marked verified once every ad on its first page came back with the expected label. A wrong id drops every ad in silence, which is the worst kind of bug: it looks like an empty market.",
+  "cars":        {"id": 2,  "verified": "2026-09-26", "label": "Voitures",  "aliases": ["voitures", "voiture", "car"]},
+  "vans":        {"id": 5,  "verified": "2026-09-26", "label": "Utilitaires", "aliases": ["utilitaires", "van", "utility"]},
+  "motorbikes":  {"id": 3,  "verified": "2026-09-26", "label": "Motos", "aliases": ["motos", "moto", "motorbike"]},
+  "bikes":       {"id": 55, "verified": "2026-09-26", "label": "Vélos", "aliases": ["velos", "vélos", "velo", "bike", "bicycle"]},
+  "sport":       {"id": 29, "verified": "2026-09-26", "label": "Sport", "aliases": ["sports", "sport & plein air"]},
+  "furniture":   {"id": 19, "verified": "2026-09-26", "label": "Ameublement", "aliases": ["ameublement", "meubles", "furniture"]},
+  "appliances":  {"id": 20, "verified": "2026-09-26", "label": "Électroménager", "aliases": ["electromenager", "électroménager", "appliance"]},
+  "diy":         {"id": 21, "verified": "2026-09-26", "label": "Bricolage", "aliases": ["bricolage", "outillage", "tools"]},
+  "phones":      {"id": 17, "verified": "2026-09-26", "label": "Téléphones & Objets connectés", "aliases": ["telephonie", "téléphonie", "phone", "smartphone"]},
+  "photo_audio_video": {"id": 16, "verified": "2026-09-26", "label": "Photo, audio & vidéo", "aliases": ["image_son", "image et son", "hifi", "camera"]},
+  "computers":   {"id": 15, "verified": "2026-09-26", "label": "Ordinateurs", "aliases": ["informatique", "computer", "pc", "laptop"]},
+  "consoles":    {"id": 43, "verified": "2026-09-26", "label": "Consoles", "aliases": ["consoles_jeux", "console", "gaming"]},
+  "books":       {"id": 27, "verified": "2026-09-26", "label": "Livres", "aliases": ["livres", "livre", "book"]},
+  "clothes":     {"id": 22, "verified": "2026-09-26", "label": "Vêtements", "aliases": ["vetements", "vêtements", "clothing"]},
+  "gardening":   {"candidates": [], "verified": null, "label": "Jardinage", "aliases": ["jardinage", "garden"],
+                  "notes": "id 32 was probed and answers 'Equipements industriels', so it is NOT gardening. Probe a candidate with the categories tool before using this name."},
+  "toys":        {"candidates": [], "verified": null, "label": "Jeux et jouets", "aliases": ["jeux_jouets", "jouets", "toy"],
+                  "notes": "id 40 was probed and answers 'Collection', so it is NOT toys."}
+}
