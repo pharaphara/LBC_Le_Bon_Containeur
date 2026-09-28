@@ -1,0 +1,26 @@
+services:
+  lbc:
+    image: ghcr.io/pharaphara/lbc:latest
+    # Contributors: comment the image line and uncomment this one.
+    # build: .
+    ports:
+      # The tools, over MCP.
+      - "127.0.0.1:8788:8788"
+      # The browser itself, to watch and to click once when a check appears.
+      - "127.0.0.1:7900:7900"
+    volumes:
+      # The session lives here, so signing in by hand is a one time gesture.
+      - lbc-profile:/profile
+      # One folder per search, with its ads as jsonl.
+      - lbc-data:/data
+    environment:
+      # Set this before exposing 7900 anywhere other than localhost.
+      # LBC_VNC_PASSWORD: choose-something
+      TZ: Europe/Paris
+    # Chromium is unhappy with a small /dev/shm and says so by crashing.
+    shm_size: "1gb"
+    restart: unless-stopped
+
+volumes:
+  lbc-profile:
+  lbc-data:

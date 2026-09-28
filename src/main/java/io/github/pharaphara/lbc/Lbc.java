@@ -310,8 +310,25 @@ public class Lbc {
         List<String> lines = new ArrayList<>();
         for (String wanted : verify == null ? List.<String>of() : verify) {
             Query.Category known = query.category(wanted);
+            if (known == null && wanted.trim().matches("\\d+")) {
+                // A bare number is probed as is, so no id is out of reach.
+                Leboncoin.Probed probed = site.probe(wanted.trim());
+                String seen = probed.labels().isEmpty() ? "" : probed.labels().get(0);
+                String verdict = probed.labels().size() > 1 ? "group of sections"
+                        : probed.labels().isEmpty() ? "no ads to read" : "reads as \"" + seen + "\"";
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("id", wanted.trim());
+                row.put("seenAs", seen);
+                row.put("labels", probed.labels());
+                row.put("total", probed.total());
+                row.put("verdict", verdict);
+                outcomes.add(row);
+                lines.add(pad("id " + wanted.trim(), 20) + pad(verdict, 28)
+                        + View.number(probed.total()) + " ads");
+                continue;
+            }
             if (known == null) {
-                lines.add(wanted + ": unknown name");
+                lines.add(wanted + ": unknown name. A numeric id can be probed directly.");
                 continue;
             }
             List<Integer> candidates = known.id() != null

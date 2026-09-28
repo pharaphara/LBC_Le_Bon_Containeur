@@ -82,6 +82,24 @@ final class Js {
               return found;
             }""";
 
+    /**
+     * The ads the page has already rendered, all of them, as full objects.
+     *
+     * <p>This is the way in when the data calls are refused, which is what happens
+     * without a session. A rendered page carries about thirty five complete ads,
+     * so paging by url still works: slower, one render per page, but it works for
+     * anyone who just started the container.
+     */
+    static final String RENDERED_ADS = """
+            () => {
+              const n = document.getElementById('__NEXT_DATA__');
+              if (!n) return [];
+              try {
+                const p = (JSON.parse(n.textContent).props || {}).pageProps || {};
+                return (p.searchData || {}).ads || [];
+              } catch (e) { return []; }
+            }""";
+
     /** One ad, from its own page. */
     static final String ONE_AD = """
             () => {

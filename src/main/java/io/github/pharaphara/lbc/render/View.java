@@ -61,11 +61,20 @@ public final class View {
 
     // ------------------------------------------------------------------ table
 
-    /** Vehicle columns only where they mean something. An empty column is noise. */
+    /** The categories where a mileage and a year mean something. */
+    private static final java.util.Set<String> ON_WHEELS = java.util.Set.of(
+            "cars", "vans", "motorbikes", "campers", "trucks",
+            "voitures", "utilitaires", "motos", "2");
+
+    /**
+     * Vehicle columns only where they mean something. An empty column is noise.
+     *
+     * <p>Matched exactly rather than by substring: "car_parts" contains "car" and
+     * has no mileage at all.
+     */
     public static List<String> columns(String category, List<AdRecord> ads) {
-        String c = category == null ? "" : category.toLowerCase(Locale.ROOT);
-        if (c.contains("car") || c.contains("van") || c.contains("motor")
-                || c.contains("voiture") || c.contains("utilitaire")) {
+        String c = category == null ? "" : category.trim().toLowerCase(Locale.ROOT);
+        if (ON_WHEELS.contains(c)) {
             return List.of("km", "year");
         }
         int looked = 0;

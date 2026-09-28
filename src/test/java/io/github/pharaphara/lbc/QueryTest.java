@@ -66,12 +66,27 @@ class QueryTest {
     }
 
     @Test
-    void verifiedCategoryAgainstUnverifiedOne() {
+    void theShippedNamesAreAllMeasured() {
         assertEquals("2", query().categoryId("cars"));
         assertEquals("2", query().categoryId("voitures"), "the French name is an alias");
         assertEquals("55", query().categoryId("bikes"));
-        LbcException e = assertThrows(LbcException.class, () -> query().categoryId("gardening"));
+        assertEquals("41", query().categoryId("toys"), "41 is Jeux & Jouets, 40 is Collection");
+        assertEquals("52", query().categoryId("garden"), "52 is Jardin & Plantes");
+    }
+
+    @Test
+    void anUnmeasuredNameIsRefusedWithSomethingToDo() throws java.io.IOException {
+        // Built here rather than taken from the shipped table, so the test does not
+        // start failing the day that category gets measured.
+        java.nio.file.Path dir = tmp.resolve("own");
+        java.nio.file.Files.createDirectories(dir);
+        java.nio.file.Files.writeString(dir.resolve("categories.json"),
+                "{\"tractors\": {\"candidates\": [70], \"verified\": null,"
+                        + " \"label\": \"Tracteurs\"}}");
+        Query own = new Query(dir);
+        LbcException e = assertThrows(LbcException.class, () -> own.categoryId("tractors"));
         assertEquals(LbcException.Kind.UNVERIFIED_CATEGORY, e.kind());
+        assertTrue(e.getMessage().contains("70"), e.getMessage());
         // The refusal must say what to do, not only that it refuses.
         assertTrue(e.advice().contains("categories"), e.advice());
     }

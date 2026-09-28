@@ -1,0 +1,7 @@
+target/
+.git/
+.github/
+.idea/
+*.iml
+cp.txt
+README.md

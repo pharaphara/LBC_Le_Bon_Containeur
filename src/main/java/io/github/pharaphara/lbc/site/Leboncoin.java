@@ -148,25 +148,107 @@ public class Leboncoin {
         return Json.map(page.evaluate(Js.CALL, List.of(API, key, payload)));
     }
 
-    /** A refusal from the api: is it the session, or only this call? */
-    private void refused(Page page, Map<String, Object> answer) {
-        Double status = Ads.num(answer.get("status"));
+    /**
+     * A refusal from the api. Two very different things hide behind one code.
+     *
+     * <p>No anti robot marker in the body means the public web key rotated, and
+     * there is nothing to work around. A marker means the data calls want a
+     * session the browser does not have yet, which is survivable: the rendered
+     * pages are still readable, so the caller falls back to those.
+     */
+    private boolean keyIsStale(Map<String, Object> answer) {
         String body = String.valueOf(answer.getOrDefault("body", "")).toLowerCase();
-        boolean robotWall = body.contains("datadome") || body.contains("captcha")
-                || body.contains("blocked") || body.contains("bloqu");
-        if (!robotWall) {
-            throw new LbcException(LbcException.Kind.STALE_KEY,
-                    "the api answered " + fmt(status) + " with no anti robot marker",
-                    "the site's public web key has probably rotated. Nothing to work around:"
-                            + " load a results page in the browser so the tool can learn the"
-                            + " new one from a real request.");
-        }
+        return !(body.contains("datadome") || body.contains("captcha")
+                || body.contains("blocked") || body.contains("bloqu"));
+    }
+
+    private LbcException staleKey(Map<String, Object> answer) {
+        return new LbcException(LbcException.Kind.STALE_KEY,
+                "the api answered " + fmt(Ads.num(answer.get("status")))
+                        + " with no anti robot marker",
+                "the site's public web key has probably rotated. Nothing to work around:"
+                        + " load a results page in the browser so the tool can learn the"
+                        + " new one from a real request.");
+    }
+
+    /** A wall on the page itself is where this stops and asks for a human. */
+    private LbcException walled(Page page, String fallbackReason) {
         Walls.Outcome outcome = Walls.pass(page, browser::view, null);
-        String reason = outcome.reason() != null ? outcome.reason()
-                : "the api refused the call (http " + fmt(status) + ") while the page stays readable";
-        throw new LbcException(LbcException.Kind.WALL, reason,
+        String reason = outcome.reason() != null ? outcome.reason() : fallbackReason;
+        return new LbcException(LbcException.Kind.WALL, reason,
                 Walls.advice(props.vncUrl(), reason,
                         outcome.attempt() == null ? "tried nothing, on purpose" : outcome.attempt()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> renderedAds(Page page) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Object o : Json.list(page.evaluate(Js.RENDERED_ADS))) {
+            if (o instanceof Map<?, ?> m) {
+                out.add((Map<String, Object>) m);
+            }
+        }
+        return out;
+    }
+
+    private static String withPage(String url, int page) {
+        String clean = url.replaceAll("[?&]page=\\d+", "");
+        return clean + (clean.contains("?") ? "&" : "?") + "page=" + page;
+    }
+
+    /**
+     * Read the rendered pages instead of asking for data.
+     *
+     * <p>The slow way in, and the only one available until somebody passes the
+     * check once. One render per page, about thirty five ads each, and the answer
+     * says so plainly rather than pretending it collected everything.
+     */
+    private Collected byRendering(Page page, String name, String url, String categoryId,
+                                  int pages, int cap, int already, Payload first,
+                                  boolean renderedFirst) {
+        int fresh = 0;
+        int duplicates = 0;
+        int outOfCategory = 0;
+        int read = 0;
+        int done = 0;
+        String stop = "end";
+
+        for (int n = 1; n <= Math.max(1, Math.min(pages, props.maxPages())); n++) {
+            if (already + fresh >= cap) {
+                stop = "ceiling";
+                break;
+            }
+            if (n > 1) {
+                park(page, withPage(url, n), true);
+            }
+            List<Map<String, Object>> ads = renderedAds(page);
+            read += ads.size();
+            done++;
+            if (ads.isEmpty()) {
+                stop = "empty";
+                break;
+            }
+            Store.Added added = store.add(name, ads, categoryId);
+            fresh += added.fresh();
+            duplicates += added.duplicates();
+            outOfCategory += added.outOfCategory();
+            if (added.fresh() == 0 && added.outOfCategory() == 0) {
+                stop = "nothing_new";
+                break;
+            }
+            if (ads.size() < 30) {
+                stop = "end";
+                break;
+            }
+            stop = "pages";
+            sleep(1200 + (long) (Math.random() * 1500));
+        }
+        String note = "the data calls were refused, which is what happens until a session exists,"
+                + " so the rendered pages were read instead: about 35 ads per page rather than 100,"
+                + " and one page render each. Sign in once at " + props.vncUrl()
+                + " and the fast path opens by itself.";
+        return new Collected(done, 0, read, fresh, duplicates, outOfCategory, 0,
+                "rendered_pages:" + stop, note, first.totals(), first.search(), renderedFirst);
     }
 
     // ------------------------------------------------------------------ collect
@@ -236,7 +318,21 @@ public class Leboncoin {
                     continue;
                 }
                 if (code == 401 || code == 403) {
-                    refused(page, answer);
+                    if (keyIsStale(answer)) {
+                        throw staleKey(answer);
+                    }
+                    if (pageCount == 0) {
+                        // Nothing collected yet, and the page itself is fine: read
+                        // what it renders rather than hand back an empty result.
+                        if (renderedAds(page).isEmpty()) {
+                            throw walled(page, "the api refused the call (http " + code
+                                    + ") and the page renders no ads either");
+                        }
+                        return byRendering(page, name, url, categoryId, wanted, cap, already,
+                                payload, rendered);
+                    }
+                    stop = "api_refused";
+                    break;
                 }
                 Map<String, Object> data = Json.map(answer.get("data"));
                 if (code != 200 || data.isEmpty()) {

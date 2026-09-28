@@ -40,6 +40,11 @@
       <groupId>org.springframework.ai</groupId>
       <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
     </dependency>
+    <!--
+      The bundle carries the Node runtime Playwright needs, at the version it
+      needs, which is why it is kept rather than replaced by a system package.
+      The image drops the four platforms it will never run, in the Dockerfile.
+    -->
     <dependency>
       <groupId>com.microsoft.playwright</groupId>
       <artifactId>playwright</artifactId>
