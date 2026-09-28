@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: lbc
+  ai:
+    mcp:
+      server:
+        name: lbc
+        version: 0.1.0
+        # streamable http on /mcp is the default, and what a long running
+        # container wants: the browser and its profile stay warm between calls.
+        protocol: streamable
+        instructions: |
+          LBC browses leboncoin.fr through a real browser.
+
+          Start with search, then read the market markers before the rows. Use results to
+          filter and sort what was collected, which costs nothing, and ad for the full detail
+          of two or three of them rather than skimming twenty.
+
+          Ad numbers are stable for the life of a search, so ad(number=7) means the same ad
+          later in the conversation.
+
+          Lines starting with !! matter: they say when the site widened the search, ignored a
+          filter, or when a collection stopped early. Never present a partial table as complete.
+
+          If a tool answers with a wall, a human has to pass the check once in the browser.
+          Say so and stop: do not retry in a loop, and there is nothing to work around.
+
+server:
+  port: 8788
+
+logging:
+  level:
+    root: warn
+    io.github.pharaphara.lbc: info
+
+lbc:
+  profile: /profile
+  data: /data
+  headless: false
+  vnc-url: http://localhost:7900
