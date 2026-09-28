@@ -1,13 +1,23 @@
-# LBC, le bon container
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/brand/banner-light.png">
+  <img alt="le bon container. Il a la tête de l'emploi. MCP server, headed Chromium, Docker." src="assets/brand/banner-light.png" width="100%">
+</picture>
 
-Browse [leboncoin.fr](https://www.leboncoin.fr) with an AI, through a real
-browser, over [MCP](https://modelcontextprotocol.io).
+**Français** · [English](README.en.md)
 
-![build](https://github.com/pharaphara/LBC_Le_Bon_Containeur/actions/workflows/build.yml/badge.svg)
+# le bon container
 
-One container, nine tools, and results an assistant can actually work with: market
-markers first, a compact table next, the full detail on disk, and ad numbers that
-never move.
+**Il a la tête de l'emploi.**
+
+Explorer les annonces [Leboncoin](https://www.leboncoin.fr) avec une IA, dans un
+vrai navigateur, à travers [MCP](https://modelcontextprotocol.io).
+
+![build](https://github.com/pharaphara/le-bon-container/actions/workflows/build.yml/badge.svg)
+
+Un conteneur, neuf outils, et des résultats exploitables par un assistant : les
+repères de marché d'abord, un tableau compact ensuite, le détail complet sur le
+disque, et des numéros d'annonces qui ne bougent jamais.
 
 ```
 search "vtt electrique", place 12, price max 1500
@@ -25,207 +35,275 @@ market: 45 private, 1 pro, median age 118 d, 6 bumped since first posted
 - more: results(offset=25) for the remaining 21
 ```
 
-## Quick start
+Les catégories et les valeurs de filtres se disent avec les mots du site
+(« Voitures », « électrique », « particulier »). Les outils répondent en anglais,
+comme le code. Seule la documentation est
+bilingue.
+
+## Démarrage rapide
 
 ```bash
 docker compose up -d
 ```
 
-Then point your client at it. With Claude Code:
+Puis on branche son client dessus : voir [brancher un
+client](#brancher-un-client) juste en dessous, pour Claude Code, Claude, ChatGPT
+et Codex.
+
+Rien à compiler et aucun JDK à installer : l'image est construite et publiée par
+l'intégration continue.
+
+**Une fois, au début**, ouvrir <http://localhost:7900>. Vous regardez le navigateur
+du conteneur, et c'est là qu'un humain fait la seule chose qu'aucun outil ne
+devrait faire : passer le contrôle anti-robot, et se connecter au site si vous le
+souhaitez.
+
+Ce n'est pas facultatif, et il vaut la peine de savoir pourquoi. Mesuré sur un
+conteneur neuf : le site rend ses pages sans broncher, mais refuse les appels de
+données par un 403 portant un marqueur anti-robot, et au bout de quelques requêtes
+il finit par contrôler la page elle-même. Un profil tout neuf n'a simplement aucune
+validation. Passez le contrôle une fois à la main, et le profil s'en souvient.
+Savoir si un compte apporte quelque chose en plus n'a pas été mesuré, donc ce
+document ne l'affirme pas.
+
+## Brancher un client
+
+Le serveur parle MCP en HTTP sur `http://localhost:8788/mcp`. Voici les quatre
+cas les plus courants.
+
+**Claude Code**
 
 ```bash
 claude mcp add --transport http lbc http://localhost:8788/mcp
 ```
 
-Or, in a client that takes a config file:
+**Claude, application de bureau**
+
+Dans le fichier de configuration des serveurs MCP :
 
 ```json
 { "mcpServers": { "lbc": { "type": "http", "url": "http://localhost:8788/mcp" } } }
 ```
 
-Nothing to compile and no JDK to install: the image is built and published by CI.
+Les versions récentes permettent aussi d'ajouter un connecteur personnalisé
+depuis les réglages, en collant la même adresse.
 
-**Once, at the beginning**, open <http://localhost:7900>. You are looking at the
-container's own browser, and this is where a human does the one thing no tool
-should: pass the anti robot check, and sign in if you want to.
+**ChatGPT**
 
-This is not optional, and it is worth knowing why. Measured on a brand new
-container: the site renders its pages happily, but refuses the data calls with a
-403 carrying an anti robot marker, and after a few requests it challenges the page
-itself. A fresh profile simply has no clearance yet. Pass the check by hand once,
-and the profile remembers it. Whether an account adds anything on top has not been
-measured, so this readme does not claim it does.
+Il faut une adresse **publique en HTTPS** : ChatGPT n'atteindra jamais votre
+`localhost`. Mettez donc un reverse proxy avec TLS devant le port 8788, par
+exemple `lbc.exemple.org`, puis ajoutez-le comme connecteur personnalisé dans les
+réglages de votre compte. La disponibilité de cette fonction dépend de votre offre
+et de vos réglages, ce document ne peut pas le savoir à votre place. Et n'exposez
+rien sans authentification devant : ces outils pilotent un navigateur qui porte
+votre session.
 
-## The tools
+**Codex**
 
-| Tool | What it does |
+Dans `~/.codex/config.toml` :
+
+```toml
+[mcp_servers.lbc]
+command = "npx"
+args = ["-y", "mcp-remote", "http://localhost:8788/mcp"]
+```
+
+Cette forme passe par une passerelle, donc elle marche quelle que soit la version.
+Si la vôtre accepte directement une adresse HTTP, la déclarer ainsi évite la
+passerelle.
+
+**N'importe quel autre client qui ne parle que stdio** se branche de la même
+façon, par une passerelle du type `mcp-remote` pointée sur la même adresse.
+
+## Les outils
+
+| Outil | Ce qu'il fait |
 |---|---|
-| `search` | Collect a search. One page render, then paging by data calls. Returns markers, then a table. |
-| `results` | Re-read what was collected: filter and sort, offline, as often as you like. |
-| `ad` | Everything about one ad, with no network. `refresh=true` checks the site again. |
-| `stats` | The market in numbers, optionally grouped by brand, year, city or seller. |
-| `filters` | What the site kept of a search url, and what it quietly threw away. |
-| `categories` | List the 45 measured categories, or probe any id on the spot. |
-| `searches` | What is on disk, and which search the other tools default to. |
-| `forget` | Delete a search and its ads. |
-| `status` | How the container is wired, and where to click if a wall appears. |
+| `search` | Collecte une recherche. Un rendu de page, puis la pagination par appels de données. Rend les repères, puis un tableau. |
+| `results` | Relit ce qui a été collecté : filtrer et trier, hors ligne, autant de fois qu'on veut. |
+| `ad` | Tout sur une annonce, sans réseau. `refresh=true` va revérifier sur le site. |
+| `stats` | Le marché en chiffres, éventuellement groupé par marque, année, ville ou vendeur. |
+| `filters` | Ce que le site a retenu d'une URL de recherche, et ce qu'il a jeté en silence. |
+| `categories` | Les 45 catégories mesurées, ou le sondage d'un identifiant à la demande. |
+| `searches` | Ce qui est sur le disque, et la recherche que les autres outils visent par défaut. |
+| `forget` | Supprime une recherche et ses annonces. |
+| `status` | Comment le conteneur est câblé, et où cliquer si un mur apparaît. |
 
-## How it works
+## Comment ça marche
 
-Four things were measured rather than assumed, and they are the whole design.
+Quatre choses ont été mesurées plutôt que supposées, et elles font toute la
+conception.
 
-**The page hands over its own search payload.** A results page embeds the exact
-query the site derived from the URL. So LBC never invents a filter name: it builds
-a URL out of parameters that were each measured against the total the site
-announces, renders it once, then replays the site's own payload to page through the
-rest. Rendering is the expensive part, and it happens once.
+**La page livre sa propre charge de recherche.** Une page de résultats embarque la
+requête exacte que le site a dérivée de l'URL. Donc rien n'est inventé : on
+construit une URL avec des paramètres mesurés un par un contre le total que le site
+annonce, on la rend une fois, puis on rejoue sa propre charge pour parcourir le
+reste. Le rendu est le poste coûteux, et il n'a lieu qu'une fois.
 
-**Paging is on `offset` alone.** The `pivot` the site returns looks like a cursor
-but is a list of ids already shown, and replaying it from offset zero hands back
-the same ads. `max_pages` comes out at 2 for 122 ads, so it is reported and never
-trusted.
+**La pagination se fait sur `offset` seul.** Le `pivot` que le site renvoie
+ressemble à un curseur mais n'est qu'une liste d'identifiants déjà montrés : le
+rejouer depuis l'offset zéro rend les mêmes annonces. `max_pages` vaut 2 pour 122
+annonces, donc il est affiché et jamais utilisé comme borne.
 
-**The list already carries everything.** Measured on one ad: 6588 characters of
-description in the search results, exactly as many as on the ad's own page, plus
-every attribute and every photo. So `ad` costs nothing and touches no network.
-Visiting an ad only tells you one thing the list cannot: whether the price moved
-or it has been sold since.
+**La liste porte déjà tout.** Mesuré sur une annonce : 6588 caractères de
+description dans les résultats de recherche, exactement autant que sur sa propre
+page, avec tous les attributs et toutes les photos. Donc `ad` ne coûte rien et ne
+touche pas au réseau. Visiter une annonce n'apprend qu'une seule chose que la liste
+ignore : si le prix a bougé ou si elle est vendue depuis.
 
-**The api repeats itself.** Three responses totalling 224 lines once carried only
-120 distinct ids. Deduplication is a requirement here, not a precaution, and the
-count you read is always the count of unique ads.
+**L'API se répète.** Trois réponses totalisant 224 lignes ne portaient que 120
+identifiants distincts. Le dédoublonnage n'est pas une précaution ici, c'est une
+obligation, et le nombre affiché est toujours celui des annonces uniques.
 
-**And when the data calls are refused, the rendered pages still work.** Until a
-profile has clearance, LBC reads what the page itself renders, about thirty five
-ads at a time, and pages by url instead. It is slower, one render per page, and the
-answer says so in as many words rather than pretending otherwise. Pass the check
-once and the fast path opens by itself.
+**Et quand les appels de données sont refusés, les pages rendues marchent
+encore.** Tant qu'un profil n'a pas de validation, on lit ce que la page rend
+elle-même, une trentaine d'annonces à la fois, et on pagine par l'URL. C'est plus
+lent, un rendu par page, et la réponse le dit en toutes lettres au lieu de faire
+semblant. Passez le contrôle une fois et la voie rapide s'ouvre d'elle-même.
 
-And one thing that is not about the site at all: **numbers never move.** An ad
-keeps the number it was given the first time it was seen. `ad(number=7)` means the
-same ad ten messages later, after two more pages and a sort by price. That single
-property is what makes a long conversation with a marketplace bearable.
+Et une dernière chose, qui ne tient pas au site : **les numéros ne bougent
+jamais.** Une annonce garde le numéro reçu la première fois qu'on l'a vue.
+`ad(number=7)` désigne la même annonce dix messages plus tard, après deux pages de
+plus et un tri par prix. Cette seule propriété rend supportable une longue
+conversation avec une place de marché.
 
-## Categories are measured, not copied
+## Les catégories sont mesurées, pas recopiées
 
-Forty five of them, and every id came from the site's own data rather than from
-somebody's notes. Each ad carries both its `category_id` and its `category_name`,
-so browsing the whole site sorted by date hands back canonical pairs by the dozen:
-210 ads over six pages gave 44 of them in one sitting.
+Quarante-cinq, et chaque identifiant vient des données du site plutôt que des notes
+de quelqu'un. Chaque annonce porte à la fois son `category_id` et son
+`category_name`, donc parcourir le site trié par date rend des paires canoniques à
+la douzaine : 210 annonces sur six pages en ont donné 44 d'un coup.
 
-That method immediately corrected two ids that looked right and were not. Toys is
-41, while 40 is Collection. Garden is 52, and 32 is industrial equipment. Either
-one would have returned an empty market with no error at all, which is the failure
-that matters here: a wrong id does not fail, it just quietly finds nothing.
+Cette méthode a immédiatement corrigé deux identifiants qui avaient l'air justes et
+ne l'étaient pas. Les jouets, c'est 41, alors que 40 est Collection. Le jardin,
+c'est 52, alors que 32 est l'équipement industriel. L'un comme l'autre auraient
+rendu un marché vide sans la moindre erreur, et c'est bien le défaut qui compte
+ici : un mauvais identifiant n'échoue pas, il ne trouve simplement rien.
 
-So a name that was never measured is refused rather than used. Any numeric id works
-directly, and `categories(verify=["70"])` probes one on the spot and tells you what
-the site calls it.
+Un nom jamais mesuré est donc refusé plutôt qu'utilisé. N'importe quel identifiant
+numérique fonctionne directement, et `categories(verify=["70"])` en sonde un sur le
+champ et vous dit comment le site l'appelle.
 
-## No disguise, ever
+## Aucun déguisement, jamais
 
-The wall on this kind of site is a JavaScript challenge, not a fingerprint. Six
-sessions across four spoofed fingerprints were all refused, while one real browser
-with a real session walked straight through. A better disguise is the wrong
-dimension.
+Le mur sur ce genre de site est un défi JavaScript, pas une empreinte. Six sessions
+sur quatre familles d'empreintes maquillées ont toutes été refusées, là où un vrai
+navigateur avec une vraie session est passé sans encombre. Mieux se déguiser est
+donc la mauvaise dimension.
 
-So LBC drives a real browser with your own session. It does not patch `navigator`,
-it does not forge a user agent, it does not even pass the flag that hides
-automation, and it never calls a captcha solving service. Faced with a check it
-waits, because a real browser usually clears one on its own, then ticks at most one
-checkbox. A puzzle is where it stops and tells you to look at
-<http://localhost:7900>. A test enforces all of this: fifteen patterns are banned
-from the source tree, and the scanner is itself tested against a known disguise.
+Alors ce conteneur pilote un vrai navigateur avec votre propre session. Il ne
+bricole pas `navigator`, il ne falsifie pas d'agent utilisateur, il ne passe même
+pas le drapeau qui masque l'automatisation, et il n'appelle jamais de service de
+résolution de captcha. Devant un contrôle il attend, parce qu'un vrai navigateur en
+vient souvent à bout tout seul, puis il coche au plus une case. Un puzzle est
+l'endroit où il s'arrête et vous renvoie vers <http://localhost:7900>. Un test
+impose tout cela : quinze motifs sont bannis du dépôt, et le détecteur est
+lui-même éprouvé contre un déguisement connu.
 
-## Nothing silent
+## Rien en silence
 
-Every reduction is counted and shown, on a line starting with `!!`. A criterion the
-site ignored, an ad set aside because it came from another section, a duplicate, a
-collection that stopped early, a search served from disk: each one produces a
-number in the output.
+Chaque réduction est comptée et montrée, sur une ligne commençant par `!!`. Un
+critère que le site a ignoré, une annonce écartée parce qu'elle venait d'une autre
+rubrique, un doublon, une collecte arrêtée avant la fin, une recherche servie
+depuis le disque : chacune produit un chiffre dans la réponse.
 
-This is the failure the project is built against. A table that dropped a third of
-its rows without saying so reads exactly like a thin market, and an assistant has
-no way to tell the difference.
+C'est le défaut contre lequel ce projet est bâti. Un tableau qui a perdu un tiers de
+ses lignes sans le dire se lit exactement comme un marché étroit, et un assistant
+n'a aucun moyen de faire la différence.
 
 ## Configuration
 
-Everything has a working default. Set what you need in `compose.yaml`.
+Tout a une valeur par défaut qui fonctionne. On ne règle que ce dont on a besoin,
+dans `compose.yaml`.
 
-| Variable | Default | What it is |
+| Variable | Défaut | Ce que c'est |
 |---|---|---|
-| `LBC_DATA` | `/data` | One folder per search. Mount it to keep your searches. |
-| `LBC_PROFILE` | `/profile` | The browser profile, so a sign in survives a restart. |
-| `LBC_HEADLESS` | `false` | A human must be able to see the page to pass a check. |
-| `LBC_CDP_URL` | unset | Attach to a browser already running instead of starting one. |
-| `LBC_VNC_PASSWORD` | unset | Set this before exposing port 7900 anywhere but localhost. |
-| `LBC_VIEWER` | `on` | `off` skips the display and the viewer entirely. |
-| `LBC_MAX_PAGES` | `20` | Hard stop on pages per collection. |
-| `LBC_MAX_ADS` | `2000` | Hard stop on ads per search. |
-| `LBC_CALLS_PER_MINUTE` | `20` | Our own pace limit. Being fast was never the point. |
-| `SERVER_PORT` | `8788` | Where MCP listens. |
+| `LBC_DATA` | `/data` | Un dossier par recherche. À monter pour conserver ses recherches. |
+| `LBC_PROFILE` | `/profile` | Le profil du navigateur, pour qu'une connexion survive à un redémarrage. |
+| `LBC_HEADLESS` | `false` | Un humain doit pouvoir voir la page pour passer un contrôle. |
+| `LBC_CDP_URL` | vide | Se rattacher à un navigateur déjà lancé au lieu d'en démarrer un. |
+| `LBC_VNC_PASSWORD` | vide | À renseigner avant d'exposer le port 7900 ailleurs que sur la machine locale. |
+| `LBC_VIEWER` | `on` | `off` supprime l'affichage et le visualiseur. |
+| `LBC_MAX_PAGES` | `20` | Butée dure sur le nombre de pages par collecte. |
+| `LBC_MAX_ADS` | `2000` | Butée dure sur le nombre d'annonces par recherche. |
+| `LBC_CALLS_PER_MINUTE` | `20` | Notre propre cadence. Aller vite n'a jamais été le but. |
+| `SERVER_PORT` | `8788` | Le port d'écoute de MCP. |
 
-**Bring your own browser.** With `LBC_CDP_URL` pointing at a Chromium that is
-already running with remote debugging on, LBC attaches to it and uses its first
-context, which is the real profile with the real session. Nothing is launched and
-nothing is closed: the browser is yours.
+**Apportez votre navigateur.** Avec `LBC_CDP_URL` pointant sur un Chromium déjà
+lancé avec le pilotage à distance activé, le conteneur s'y rattache et utilise son
+premier contexte, c'est-à-dire le vrai profil avec la vraie session. Rien n'est
+lancé et rien n'est fermé : le navigateur est le vôtre.
 
-**Behind a reverse proxy.** Port 7900 is a web page, so any reverse proxy can put
-it behind a name of your own, for instance `lbc.example.org`. Do set
-`LBC_VNC_PASSWORD` first: whoever opens that page drives a browser that carries
-your session, which is exactly why the compose file binds both ports to localhost
-until you decide otherwise.
+**Derrière un reverse proxy.** Le port 7900 est une page web, donc n'importe quel
+reverse proxy peut la mettre derrière un nom à vous, par exemple
+`lbc.exemple.org`. Renseignez `LBC_VNC_PASSWORD` d'abord : qui ouvre cette page
+pilote un navigateur qui porte votre session, et c'est exactement pour cela que le
+fichier compose lie les deux ports à la machine locale tant que vous n'en décidez
+pas autrement.
 
-**Where your data lives.** One folder per search under `/data`:
+**Derrière un VPN.** Rien à coder : Docker sait déjà le faire avec
+`network_mode: "service:<vpn>"`, en déplaçant la publication des ports sur le
+conteneur VPN. Mais réfléchissez avant, parce que c'est souvent contre-productif
+ici. Une sortie de VPN commercial est une adresse de centre de données, et la
+réputation de l'adresse est précisément ce que les contrôles anti-robot notent :
+le mur apparaîtra plus souvent, pas moins. Le cas qui a du sens est l'inverse, un
+VPN vers votre propre réseau, qui garde une adresse résidentielle et permet de
+faire tourner le conteneur ailleurs tout en sortant de chez vous.
+
+**Où vivent vos données.** Un dossier par recherche sous `/data` :
 
 ```
-/data/<search>/
-  search.json    the url, the payload the site derived, totals, where paging stopped
-  ads.jsonl      one line per ad, the site's own object, numbered
-  skipped.jsonl  ads set aside, with the reason, so you can check the filter was fair
-  seen.tsv       the id to number registry, which is why numbers never move
-  ads/<id>.json  what a refresh brought back
+/data/<recherche>/
+  search.json    l'url, la charge que le site en a dérivée, les totaux, où la pagination s'est arrêtée
+  ads.jsonl      une ligne par annonce, l'objet du site lui-même, numéroté
+  skipped.jsonl  les annonces écartées, avec le motif, pour vérifier que le filet était juste
+  seen.tsv       le registre identifiant vers numéro, et c'est pourquoi les numéros ne bougent pas
+  ads/<id>.json  ce qu'une revérification a ramené
 ```
 
-The raw object is what gets stored, not a compact view. The full description is in
-there anyway, and recomputing the view on read avoids stale columns the day the
-formula changes.
+C'est l'objet brut qui est stocké, pas une vue compacte. La description complète y
+est de toute façon, et recalculer la vue à la lecture évite des colonnes périmées le
+jour où la formule change.
 
-## Development
+## Développement
 
 ```bash
-mvn verify              # the domain logic: no browser, no network, frozen samples
-mvn spring-boot:run     # run it on your machine
-docker build -t lbc .   # the image
+mvn verify              # la logique métier : sans navigateur, sans réseau, sur échantillons figés
+mvn spring-boot:run     # le lancer sur sa machine
+docker build -t lbc .   # l'image
 ```
 
-Playwright ships its own Node runtime for five platforms, which is how it
-guarantees the version it needs. The image keeps the one it runs and drops the
-other four, saving 155 MB.
+Playwright embarque son propre Node pour cinq plateformes, et c'est ainsi qu'il
+garantit la version dont il a besoin. L'image garde celle qu'elle exécute et jette
+les quatre autres, soit 155 Mo.
 
-## Roadmap
+## Feuille de route
 
-**Messaging over MCP**, reading and replying, so an assistant can carry a
-negotiation on a single item by itself. The line to hold is depth against breadth:
-many messages in one thread is a negotiation, many threads with strangers is spam.
-So the caps will sit on threads opened per day rather than on replies, autonomy
-will be an explicit level rather than a default, everything sent will be logged,
-and the rule that an assistant never states a fact that is not true belongs in the
-tool description where it will actually be read.
+**La messagerie par MCP**, en lecture et en réponse, pour qu'un assistant puisse
+mener seul une négociation sur un objet. La ligne à tenir est la profondeur contre
+la largeur : beaucoup d'échanges dans un même fil, c'est une négociation ; beaucoup
+de fils ouverts avec des inconnus, c'est du spam. Les plafonds porteront donc sur
+les fils ouverts par jour et non sur les réponses, l'autonomie sera un niveau
+explicite et non un défaut, tout ce qui part sera journalisé, et la règle selon
+laquelle un assistant n'énonce jamais un fait faux a sa place dans la description
+de l'outil, là où elle sera vraiment lue.
 
-**Signing in** without touching the viewer, for people who would rather put
-credentials in the compose file. It will stay an option and not the default: a
-marketplace password sitting in plain text is a poor trade for a gesture you make
-once.
+**La connexion au site** sans passer par le visualiseur, pour qui préfère mettre
+des identifiants dans le fichier compose. Ce restera une option et non le défaut :
+un mot de passe de place de marché en clair est un mauvais échange contre un geste
+qu'on ne fait qu'une fois.
 
-## Responsible use
+## Usage responsable
 
-This is a personal automation tool. It drives your own browser and your own
-session, at a human pace, and reads pages you could open yourself. Automated
-access is against the site's terms of use, so what you do with it is on you. Keep
-it to your own searches and your own conversations: there is deliberately no way
-to message many people at once, and there never will be.
+C'est un outil d'automatisation personnelle. Il pilote votre navigateur et votre
+session, à un rythme humain, et lit des pages que vous pourriez ouvrir vous-même.
+L'accès automatisé est contraire aux conditions d'utilisation du site, donc ce que
+vous en faites vous regarde. Gardez-le pour vos propres recherches et vos propres
+conversations : il n'existe délibérément aucun moyen d'écrire à plusieurs personnes
+à la fois, et il n'y en aura jamais.
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+MIT. Voir [LICENSE](LICENSE).
+
+Projet indépendant, non affilié à Leboncoin.

@@ -597,11 +597,8 @@ public class Lbc {
         return !a.isEmpty() && !b.isEmpty() && (a.contains(b) || b.contains(a));
     }
 
-    /** Accents and case decide nothing: "velos" must recognise "Velos". */
+    /** One folding rule for the whole tool, in Query. */
     private static String fold(String s) {
-        String t = java.text.Normalizer.normalize(s == null ? "" : s.toLowerCase(),
-                        java.text.Normalizer.Form.NFKD)
-                .replaceAll("[^\\p{ASCII}]", "");
-        return t.replaceAll("[^a-z0-9 ]", "").trim();
+        return Query.fold(s);
     }
 }

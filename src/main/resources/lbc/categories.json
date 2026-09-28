@@ -1,442 +1,400 @@
 {
- "_note": "Category ids are MEASURED, never copied. Every id below came from the site's own data: each ad carries both its category_id and its category_name, so browsing the whole site sorted by date hands back canonical pairs by the dozen. Measured 2026-09-28 over 210 ads across six pages, plus one direct probe. A wrong id drops every ad in silence, which looks exactly like an empty market, so an unmeasured name is refused rather than used. Any numeric id also works directly, and the categories tool can probe one on demand.",
- "cars": {
+ "_note": "Categories are keyed by the name leboncoin itself displays, because inventing an English key would be inventing something. Matching ignores case, accents and punctuation, so \"velos\" finds \"Vélos\", and the aliases only carry words the site does not use. Every id was MEASURED: each ad carries both its category_id and its category_name, so browsing the site sorted by date hands back canonical pairs by the dozen. Measured 2026-09-28 over 210 ads across six pages, plus one direct probe. A wrong id drops every ad in silence, which looks exactly like an empty market, so an unmeasured name is refused rather than used. Any numeric id works directly, and the categories tool can probe one on demand.",
+ "Voitures": {
   "id": 2,
   "verified": "2026-09-28",
-  "label": "Voitures",
   "source": "ads",
   "aliases": [
    "car",
-   "voiture",
-   "voitures"
+   "cars",
+   "voiture"
   ]
  },
- "motorbikes": {
+ "Motos": {
   "id": 3,
   "verified": "2026-09-28",
-  "label": "Motos",
   "source": "ads",
   "aliases": [
    "moto",
-   "motos"
+   "motorbikes"
   ]
  },
- "vans": {
+ "Utilitaires": {
   "id": 5,
   "verified": "2026-09-28",
-  "label": "Utilitaires",
   "source": "ads",
   "aliases": [
    "utilitaire",
-   "utilitaires",
-   "van"
+   "vans"
   ]
  },
- "car_parts": {
+ "Équipement auto": {
   "id": 6,
   "verified": "2026-09-28",
-  "label": "Équipement auto",
   "source": "ads",
   "aliases": [
-   "equipement auto"
+   "car parts"
   ]
  },
- "boating": {
+ "Nautisme": {
   "id": 7,
   "verified": "2026-09-28",
-  "label": "Nautisme",
   "source": "ads",
   "aliases": [
-   "nautisme"
+   "bateau",
+   "boating"
   ]
  },
- "property_sales": {
+ "Ventes immobilières": {
   "id": 9,
   "verified": "2026-09-28",
-  "label": "Ventes immobilières",
   "source": "ads",
   "aliases": [
-   "ventes immobilieres"
+   "immobilier",
+   "property"
   ]
  },
- "offices_shops": {
+ "Bureaux & Commerces": {
   "id": 13,
   "verified": "2026-09-28",
-  "label": "Bureaux & Commerces",
   "source": "ads",
   "aliases": [
-   "bureaux commerces"
+   "commerces",
+   "offices"
   ]
  },
- "computers": {
+ "Ordinateurs": {
   "id": 15,
   "verified": "2026-09-28",
-  "label": "Ordinateurs",
   "source": "ads",
   "aliases": [
+   "computers",
    "informatique",
    "laptop",
-   "ordinateur",
-   "ordinateurs",
    "pc"
   ]
  },
- "photo_audio_video": {
+ "Photo, audio & vidéo": {
   "id": 16,
   "verified": "2026-09-28",
-  "label": "Photo, audio & vidéo",
   "source": "ads",
   "aliases": [
    "camera",
    "hifi",
-   "image son",
-   "photo",
-   "photo audio video"
+   "image son"
   ]
  },
- "phones": {
+ "Téléphones & Objets connectés": {
   "id": 17,
   "verified": "2026-09-28",
-  "label": "Téléphones & Objets connectés",
   "source": "ads",
   "aliases": [
-   "mobile",
+   "phones",
    "smartphone",
-   "telephones objets connectes",
    "telephonie"
   ]
  },
- "furniture": {
+ "Ameublement": {
   "id": 19,
   "verified": "2026-09-28",
-  "label": "Ameublement",
   "source": "ads",
   "aliases": [
-   "ameublement",
-   "meuble",
+   "furniture",
    "meubles"
   ]
  },
- "appliances": {
+ "Électroménager": {
   "id": 20,
   "verified": "2026-09-28",
-  "label": "Électroménager",
   "source": "ads",
   "aliases": [
-   "electromenager"
+   "appliances"
   ]
  },
- "diy": {
+ "Bricolage": {
   "id": 21,
   "verified": "2026-09-28",
-  "label": "Bricolage",
   "source": "ads",
   "aliases": [
-   "bricolage",
+   "diy",
    "outillage",
    "tools"
   ]
  },
- "clothes": {
+ "Vêtements": {
   "id": 22,
   "verified": "2026-09-28",
-  "label": "Vêtements",
   "source": "ads",
   "aliases": [
-   "habits",
-   "vetements"
+   "clothes",
+   "habits"
   ]
  },
- "baby_gear": {
+ "Équipement bébé": {
   "id": 23,
   "verified": "2026-09-28",
-  "label": "Équipement bébé",
   "source": "ads",
   "aliases": [
-   "equipement bebe"
+   "baby gear"
   ]
  },
- "dvd_films": {
+ "DVD - Films": {
   "id": 25,
   "verified": "2026-09-28",
-  "label": "DVD - Films",
   "source": "ads",
   "aliases": [
-   "dvd films"
+   "dvd",
+   "films"
   ]
  },
- "cd_music": {
+ "CD - Musique": {
   "id": 26,
   "verified": "2026-09-28",
-  "label": "CD - Musique",
   "source": "ads",
   "aliases": [
-   "cd musique"
+   "cd",
+   "musique"
   ]
  },
- "books": {
+ "Livres": {
   "id": 27,
   "verified": "2026-09-28",
-  "label": "Livres",
   "source": "ads",
   "aliases": [
-   "livre",
-   "livres"
+   "books",
+   "livre"
   ]
  },
- "animals": {
+ "Animaux": {
   "id": 28,
   "verified": "2026-09-28",
-  "label": "Animaux",
   "source": "ads",
   "aliases": [
-   "animaux"
+   "animals"
   ]
  },
- "sport": {
+ "Sport & Plein air": {
   "id": 29,
   "verified": "2026-09-28",
-  "label": "Sport & Plein air",
   "source": "ads",
   "aliases": [
    "plein air",
-   "sport plein air",
+   "sport",
    "sports"
   ]
  },
- "instruments": {
+ "Instruments de musique": {
   "id": 30,
   "verified": "2026-09-28",
-  "label": "Instruments de musique",
   "source": "ads",
   "aliases": [
-   "instruments de musique"
+   "instruments"
   ]
  },
- "tutoring": {
+ "Cours particuliers": {
   "id": 36,
   "verified": "2026-09-28",
-  "label": "Cours particuliers",
   "source": "ads",
   "aliases": [
-   "cours particuliers"
+   "tutoring"
   ]
  },
- "decoration": {
+ "Décoration": {
   "id": 39,
   "verified": "2026-09-28",
-  "label": "Décoration",
   "source": "ads",
   "aliases": []
  },
- "collectibles": {
+ "Collection": {
   "id": 40,
   "verified": "2026-09-28",
-  "label": "Collection",
   "source": "ads",
   "aliases": [
-   "collection",
-   "collections"
+   "collectibles"
   ]
  },
- "toys": {
+ "Jeux & Jouets": {
   "id": 41,
   "verified": "2026-09-28",
-  "label": "Jeux & Jouets",
   "source": "ads",
   "aliases": [
    "jeux",
-   "jeux jouets",
-   "jouets"
+   "jouets",
+   "toys"
   ]
  },
- "watches_jewellery": {
+ "Montres & Bijoux": {
   "id": 42,
   "verified": "2026-09-28",
-  "label": "Montres & Bijoux",
   "source": "ads",
   "aliases": [
    "bijoux",
-   "montres",
-   "montres bijoux"
+   "jewellery",
+   "watches"
   ]
  },
- "consoles": {
+ "Consoles": {
   "id": 43,
   "verified": "2026-09-28",
-  "label": "Consoles",
   "source": "probe",
   "aliases": [
    "consoles jeux",
    "jeux video"
   ]
  },
- "motorbike_gear": {
+ "Équipement moto": {
   "id": 44,
   "verified": "2026-09-28",
-  "label": "Équipement moto",
   "source": "ads",
   "aliases": [
-   "equipement moto"
+   "motorbike gear"
   ]
  },
- "tableware": {
+ "Arts de la table": {
   "id": 45,
   "verified": "2026-09-28",
-  "label": "Arts de la table",
   "source": "ads",
   "aliases": [
-   "arts de la table"
+   "tableware"
   ]
  },
- "linen": {
+ "Linge de maison": {
   "id": 46,
   "verified": "2026-09-28",
-  "label": "Linge de maison",
   "source": "ads",
   "aliases": [
-   "linge de maison"
+   "linen"
   ]
  },
- "bags_accessories": {
+ "Accessoires & Bagagerie": {
   "id": 47,
   "verified": "2026-09-28",
-  "label": "Accessoires & Bagagerie",
   "source": "ads",
   "aliases": [
-   "accessoires bagagerie"
+   "bagagerie",
+   "bags"
   ]
  },
- "garden": {
+ "Jardin & Plantes": {
   "id": 52,
   "verified": "2026-09-28",
-  "label": "Jardin & Plantes",
   "source": "ads",
   "aliases": [
-   "jardin plantes",
+   "garden",
+   "jardin",
    "jardinage",
    "plantes"
   ]
  },
- "shoes": {
+ "Chaussures": {
   "id": 53,
   "verified": "2026-09-28",
-  "label": "Chaussures",
   "source": "ads",
   "aliases": [
    "chaussure",
-   "chaussures"
+   "shoes"
   ]
  },
- "baby_clothes": {
+ "Vêtements bébé": {
   "id": 54,
   "verified": "2026-09-28",
-  "label": "Vêtements bébé",
   "source": "ads",
   "aliases": [
-   "vetements bebe"
+   "baby clothes"
   ]
  },
- "bikes": {
+ "Vélos": {
   "id": 55,
   "verified": "2026-09-28",
-  "label": "Vélos",
   "source": "ads",
   "aliases": [
    "bicycle",
+   "bike",
+   "bikes",
    "velo",
-   "velos",
    "vtt"
   ]
  },
- "farm_equipment": {
+ "Matériel agricole": {
   "id": 57,
   "verified": "2026-09-28",
-  "label": "Matériel agricole",
   "source": "ads",
   "aliases": [
-   "materiel agricole"
+   "farm equipment"
   ]
  },
- "handling_lifting": {
+ "Manutention - Levage": {
   "id": 58,
   "verified": "2026-09-28",
-  "label": "Manutention - Levage",
   "source": "ads",
   "aliases": [
-   "manutention levage"
+   "handling",
+   "levage"
   ]
  },
- "shop_equipment": {
+ "Équipements pour commerces & marchés": {
   "id": 63,
   "verified": "2026-09-28",
-  "label": "Équipements pour commerces & marchés",
   "source": "ads",
   "aliases": [
-   "equipements pour commerces marches"
+   "shop equipment"
   ]
  },
- "medical_equipment": {
+ "Matériel médical": {
   "id": 64,
   "verified": "2026-09-28",
-  "label": "Matériel médical",
   "source": "ads",
   "aliases": [
-   "materiel medical"
+   "medical"
   ]
  },
- "pet_supplies": {
+ "Accessoires animaux": {
   "id": 76,
   "verified": "2026-09-28",
-  "label": "Accessoires animaux",
   "source": "ads",
   "aliases": [
-   "accessoires animaux"
+   "pet supplies"
   ]
  },
- "tablets_ereaders": {
+ "Tablettes & Liseuses": {
   "id": 82,
   "verified": "2026-09-28",
-  "label": "Tablettes & Liseuses",
   "source": "ads",
   "aliases": [
-   "tablettes liseuses"
+   "liseuses",
+   "tablets"
   ]
  },
- "computer_accessories": {
+ "Accessoires informatique": {
   "id": 83,
   "verified": "2026-09-28",
-  "label": "Accessoires informatique",
   "source": "ads",
   "aliases": [
-   "accessoires informatique"
+   "computer accessories"
   ]
  },
- "mechanic_services": {
+ "Services de réparations mécaniques": {
   "id": 93,
   "verified": "2026-09-28",
-  "label": "Services de réparations mécaniques",
   "source": "ads",
   "aliases": [
-   "services de reparations mecaniques"
+   "mechanic services"
   ]
  },
- "garden_services": {
+ "Services de jardinerie & bricolage": {
   "id": 97,
   "verified": "2026-09-28",
-  "label": "Services de jardinerie & bricolage",
   "source": "ads",
   "aliases": [
-   "services de jardinerie bricolage"
+   "garden services"
   ]
  },
- "event_services": {
+ "Services évènementiels": {
   "id": 98,
   "verified": "2026-09-28",
-  "label": "Services évènementiels",
   "source": "ads",
   "aliases": [
-   "services evenementiels"
+   "event services"
   ]
  }
 }

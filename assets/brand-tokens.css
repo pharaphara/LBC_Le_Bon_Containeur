@@ -1,0 +1,11 @@
+/* Palette de référence — Le Bon Container, direction industrielle.
+   Les polices ne sont pas incluses. Ce CSS ne modifie pas les README GitHub. */
+:root {
+  --lbc-orange: #EC5A13;
+  --lbc-orange-deep: #C9460E;
+  --lbc-navy: #18283B;
+  --lbc-cream: #FFF4E4;
+  --lbc-font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --lbc-font-body: 'Barlow', Arial, sans-serif;
+  --lbc-font-code: 'JetBrains Mono', monospace;
+}

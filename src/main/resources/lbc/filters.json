@@ -1,39 +1,114 @@
 {
-  "_note": "Every parameter here was measured against the total the site announces, never guessed. Counts that pinned them down, on category 2 in one French department: category alone 129 electric cars, + price=5000-15000 gives 31, + mileage=0-50000 gives 99, + regdate=2020-2024 gives 74, + seats=5 gives 100, + owner_type=private gives 23 and pro gives 106 which adds back to 129, + u_car_brand=RENAULT gives 17.",
-  "_common": {
-    "_note": "price is retained outside vehicles too: measured on category 55, price=min-1500 returned 3977 ads.",
-    "params": {
-      "price":    {"url": "price", "form": "span"},
-      "shipping": {"url": "shippable", "form": "enum", "values": {"yes": "true", "no": "false"}}
+ "_note": "Every parameter here was measured against the total the site announces, never guessed. Counts that pinned them down, on category 2 in one French department: category alone 129 electric cars, + price=5000-15000 gives 31, + mileage=0-50000 gives 99, + regdate=2020-2024 gives 74, + seats=5 gives 100, + owner_type=private gives 23 and pro gives 106 which adds back to 129, + u_car_brand=RENAULT gives 17.",
+ "_common": {
+  "_note": "price is retained outside vehicles too: measured on category 55, price=min-1500 returned 3977 ads.",
+  "params": {
+   "price": {
+    "url": "price",
+    "form": "span"
+   },
+   "shipping": {
+    "url": "shippable",
+    "form": "enum",
+    "values": {
+     "oui": "true",
+     "yes": "true",
+     "non": "false",
+     "no": "false"
     }
-  },
-  "cars": {
-    "verified": "2026-08",
-    "params": {
-      "mileage": {"url": "mileage", "form": "span"},
-      "year":    {"url": "regdate", "form": "span"},
-      "seats":   {"url": "seats", "form": "span"},
-      "fuel":    {"url": "fuel", "form": "enum",
-                  "values": {"electric": "4", "petrol": "1", "diesel": "2", "hybrid": "6"}},
-      "seller":  {"url": "owner_type", "form": "enum",
-                  "values": {"private": "private", "pro": "pro", "professional": "pro"}},
-      "brand":   {"url": "u_car_brand", "form": "text"}
-    },
-    "traps": [
-      "vehicle_seats and brand are ignored in silence: the site wants seats and u_car_brand",
-      "fuel code 5 returns nothing, so it is not offered"
-    ]
-  },
-  "vans": {
-    "verified": "2026-08",
-    "params": {
-      "mileage": {"url": "mileage", "form": "span"},
-      "year":    {"url": "regdate", "form": "span"},
-      "fuel":    {"url": "fuel", "form": "enum",
-                  "values": {"electric": "4", "petrol": "1", "diesel": "2", "hybrid": "6"}},
-      "seller":  {"url": "owner_type", "form": "enum",
-                  "values": {"private": "private", "pro": "pro", "professional": "pro"}},
-      "brand":   {"url": "u_car_brand", "form": "text"}
-    }
+   }
   }
+ },
+ "Voitures": {
+  "verified": "2026-08",
+  "params": {
+   "mileage": {
+    "url": "mileage",
+    "form": "span"
+   },
+   "year": {
+    "url": "regdate",
+    "form": "span"
+   },
+   "seats": {
+    "url": "seats",
+    "form": "span"
+   },
+   "fuel": {
+    "url": "fuel",
+    "form": "enum",
+    "values": {
+     "electrique": "4",
+     "electric": "4",
+     "essence": "1",
+     "petrol": "1",
+     "gazole": "2",
+     "diesel": "2",
+     "hybride": "6",
+     "hybrid": "6"
+    }
+   },
+   "seller": {
+    "url": "owner_type",
+    "form": "enum",
+    "values": {
+     "particulier": "private",
+     "private": "private",
+     "pro": "pro",
+     "professionnel": "pro",
+     "professional": "pro"
+    }
+   },
+   "brand": {
+    "url": "u_car_brand",
+    "form": "text"
+   }
+  },
+  "traps": [
+   "vehicle_seats and brand are ignored in silence: the site wants seats and u_car_brand",
+   "fuel code 5 returns nothing, so it is not offered"
+  ]
+ },
+ "Utilitaires": {
+  "verified": "2026-08",
+  "params": {
+   "mileage": {
+    "url": "mileage",
+    "form": "span"
+   },
+   "year": {
+    "url": "regdate",
+    "form": "span"
+   },
+   "fuel": {
+    "url": "fuel",
+    "form": "enum",
+    "values": {
+     "electrique": "4",
+     "electric": "4",
+     "essence": "1",
+     "petrol": "1",
+     "gazole": "2",
+     "diesel": "2",
+     "hybride": "6",
+     "hybrid": "6"
+    }
+   },
+   "seller": {
+    "url": "owner_type",
+    "form": "enum",
+    "values": {
+     "particulier": "private",
+     "private": "private",
+     "pro": "pro",
+     "professionnel": "pro",
+     "professional": "pro"
+    }
+   },
+   "brand": {
+    "url": "u_car_brand",
+    "form": "text"
+   }
+  }
+ }
 }

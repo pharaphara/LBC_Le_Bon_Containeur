@@ -63,8 +63,8 @@ public final class View {
 
     /** The categories where a mileage and a year mean something. */
     private static final java.util.Set<String> ON_WHEELS = java.util.Set.of(
-            "cars", "vans", "motorbikes", "campers", "trucks",
-            "voitures", "utilitaires", "motos", "2");
+            "voitures", "utilitaires", "motos", "caravaning", "camions",
+            "cars", "vans", "motorbikes", "2");
 
     /**
      * Vehicle columns only where they mean something. An empty column is noise.
@@ -73,7 +73,7 @@ public final class View {
      * has no mileage at all.
      */
     public static List<String> columns(String category, List<AdRecord> ads) {
-        String c = category == null ? "" : category.trim().toLowerCase(Locale.ROOT);
+        String c = io.github.pharaphara.lbc.query.Query.fold(category);
         if (ON_WHEELS.contains(c)) {
             return List.of("km", "year");
         }

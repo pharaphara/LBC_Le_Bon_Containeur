@@ -92,6 +92,19 @@ class QueryTest {
     }
 
     @Test
+    void theSitesOwnNameIsTheName() {
+        // Keyed by what leboncoin displays, because inventing an English key would
+        // be inventing something. Matching ignores case, accents and punctuation.
+        assertEquals("41", query().categoryId("Jeux & Jouets"));
+        assertEquals("41", query().categoryId("jeux jouets"));
+        assertEquals("55", query().categoryId("V\u00e9los"));
+        assertEquals("55", query().categoryId("velos"));
+        assertEquals("16", query().categoryId("Photo, audio & vid\u00e9o"));
+        // And a few English words are kept as a convenience, not as the truth.
+        assertEquals("2", query().categoryId("cars"));
+    }
+
+    @Test
     void aNumericIdIsTrusted() {
         assertEquals("999", query().categoryId("999"));
     }

@@ -38,8 +38,9 @@ public class Tools {
 
             Filters: `category` and `place` and `priceMin`/`priceMax` are the common ones. Anything
             else goes in `extra`, for example {"mileage": "-80000", "year": "2020-", "fuel":
-            "electric", "seller": "private", "brand": "RENAULT", "seats": 5}. A span is written
-            "min-max", "2020-" or "-15000". Whatever the site has no filter for comes back in the
+            "electrique", "seller": "particulier", "brand": "RENAULT", "seats": 5}. Values take
+            the site's own words or their English equivalent. A span is written "min-max",
+            "2020-" or "-15000". Whatever the site has no filter for comes back in the
             warnings and is applied here instead, never dropped in silence.
 
             The most reliable entry is `url`: build the search by hand in the browser, copy the
@@ -50,8 +51,11 @@ public class Tools {
     public String search(
             @McpToolParam(description = "Free text, as you would type it in the search box",
                     required = false) String query,
-            @McpToolParam(description = "Category name (cars, bikes, furniture, computers...) or a"
-                    + " numeric category id. Unverified names are refused on purpose.",
+            @McpToolParam(description = "The category, named the way leboncoin names it:"
+                    + " \"Voitures\", \"Vélos\", \"Jeux & Jouets\", \"Ameublement\"..."
+                    + " Case, accents and punctuation do not matter, a few English words work"
+                    + " too, and a numeric id always works. Call the categories tool for the"
+                    + " list. A name nobody measured is refused on purpose.",
                     required = false) String category,
             @McpToolParam(description = "Postcode, or \"d_12\" for a whole department. Never"
                     + " coordinates: the site silently returns nothing for those.",
@@ -191,7 +195,10 @@ public class Tools {
     }
 
     @McpTool(name = "categories", description = """
-            List the categories, and measure the ones that are not verified yet.
+            List the categories, and measure any id on demand.
+
+            They are named the way leboncoin names them, because inventing an English key would be
+            inventing something. Matching ignores case, accents and punctuation.
 
             Category ids are measured here, never copied from somewhere else. Ads carry their own
             category name, which makes a free oracle: probing an id and reading the label back says

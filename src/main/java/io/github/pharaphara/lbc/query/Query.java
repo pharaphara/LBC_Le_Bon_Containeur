@@ -109,8 +109,9 @@ public class Query {
                 aliases.add(String.valueOf(o));
             }
             Double id = io.github.pharaphara.lbc.store.Ads.num(c.get("id"));
+            // The key is the site's own label, so there is nothing else to carry.
             out.put(name, new Category(name, id == null ? null : id.intValue(),
-                    str(c.get("verified")), str(c.get("label")), candidates, aliases,
+                    str(c.get("verified")), name, candidates, aliases,
                     str(c.get("notes"))));
         });
         return out;
@@ -118,24 +119,21 @@ public class Query {
 
     /** The category under that name, an alias, or null. */
     public Category category(String name) {
-        String wanted = norm(name);
+        String wanted = fold(name);
         if (wanted.isEmpty()) {
             return null;
         }
         Map<String, Category> all = categories();
         for (Category c : all.values()) {
-            if (norm(c.name()).equals(wanted)) {
+            if (fold(c.name()).equals(wanted)) {
                 return c;
             }
         }
         for (Category c : all.values()) {
             for (String a : c.aliases()) {
-                if (norm(a).equals(wanted)) {
+                if (fold(a).equals(wanted)) {
                     return c;
                 }
-            }
-            if (c.label() != null && norm(c.label()).equals(wanted)) {
-                return c;
             }
         }
         return null;
@@ -299,11 +297,21 @@ public class Query {
         Map<String, Rule> out = new LinkedHashMap<>();
         out.putAll(rulesOf(Json.map(filterTable.get("_common"))));
         if (category != null && !category.isBlank()) {
-            Category c = category(category);
-            String key = c != null ? c.name() : norm(category);
-            out.putAll(rulesOf(Json.map(filterTable.get(key))));
+            out.putAll(rulesOf(filterBlock(category)));
         }
         return out;
+    }
+
+    /** The filter block for a category, matched the same folded way. */
+    private Map<String, Object> filterBlock(String category) {
+        Category c = category(category);
+        String wanted = fold(c != null ? c.name() : category);
+        for (Map.Entry<String, Object> e : filterTable.entrySet()) {
+            if (!e.getKey().startsWith("_") && fold(e.getKey()).equals(wanted)) {
+                return Json.map(e.getValue());
+            }
+        }
+        return Map.of();
     }
 
     private static Map<String, Rule> rulesOf(Map<String, Object> block) {
@@ -311,7 +319,7 @@ public class Query {
         Json.map(block.get("params")).forEach((name, raw) -> {
             Map<String, Object> r = Json.map(raw);
             Map<String, String> values = new LinkedHashMap<>();
-            Json.map(r.get("values")).forEach((k, v) -> values.put(norm(k), String.valueOf(v)));
+            Json.map(r.get("values")).forEach((k, v) -> values.put(fold(k), String.valueOf(v)));
             out.put(name, new Rule(String.valueOf(r.get("url")),
                     String.valueOf(r.getOrDefault("form", "text")), values));
         });
@@ -322,9 +330,8 @@ public class Query {
     public Map<String, Object> filterHelp(String category) {
         Map<String, Object> out = new LinkedHashMap<>();
         Category c = category(category);
-        String key = c != null ? c.name() : norm(category);
-        Map<String, Object> block = Json.map(filterTable.get(key));
-        out.put("category", key);
+        Map<String, Object> block = filterBlock(category);
+        out.put("category", c != null ? c.name() : category);
         out.put("verified", block.get("verified"));
         out.put("filters", new ArrayList<>(rules(category).keySet()));
         out.put("traps", Json.list(block.get("traps")));
@@ -375,7 +382,7 @@ public class Query {
                         }
                     }
                     case "enum" -> {
-                        String code = rule.values().get(norm(String.valueOf(value)));
+                        String code = rule.values().get(fold(String.valueOf(value)));
                         if (code == null) {
                             ignored.add(name + "=" + value);
                         } else {
@@ -545,6 +552,21 @@ public class Query {
 
     private static String norm(String s) {
         return s == null ? "" : s.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * The form two category names are compared in.
+     *
+     * <p>Categories are keyed by the name the site itself displays, because
+     * inventing an English key would be inventing something. That name carries
+     * accents, ampersands and capitals, none of which anyone should have to type,
+     * so matching happens on this folded form: "velos" finds "Vélos", and
+     * "jeux jouets" finds "Jeux &amp; Jouets".
+     */
+    public static String fold(String s) {
+        String t = java.text.Normalizer.normalize(norm(s), java.text.Normalizer.Form.NFKD)
+                .replaceAll("[^\\p{ASCII}]", "");
+        return t.replaceAll("[^a-z0-9 ]", " ").replaceAll("\\s+", " ").trim();
     }
 
     private static String str(Object v) {
