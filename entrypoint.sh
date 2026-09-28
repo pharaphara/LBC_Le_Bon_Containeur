@@ -39,4 +39,31 @@ if [ "${LBC_VIEWER:-on}" != "off" ]; then
     websockify --web=/usr/share/novnc 7900 localhost:5900 >/dev/null 2>&1 &
 fi
 
+# What an operator needs to know in the first five seconds, including the one thing
+# no software can do for them. Docker prints nothing from inside a container when
+# it is started detached, so this lands in the logs: "docker compose logs lbc", or
+# "docker compose up" without -d the first time.
+VIEWER="${LBC_VNC_URL:-http://localhost:7900}"
+MCP="http://localhost:${SERVER_PORT:-8788}/mcp"
+if [ -s "${LBC_PROFILE:-/profile}/Default/Cookies" ]; then
+    PROFILE_STATE="already used, so the fast path may already be open"
+else
+    PROFILE_STATE="brand new, so the data calls will be refused and the rendered
+              pages read instead, about 35 ads per page"
+fi
+cat <<BANNER
+
+  le bon container
+  Il a la tete de l emploi.
+
+  MCP       $MCP
+  Browser   $VIEWER
+  Profile   $PROFILE_STATE
+
+  Open the browser address once and pass the anti robot check by hand, and sign in
+  if you want to. Nothing here forges a fingerprint or buys a captcha, so that one
+  click is the trade. The profile volume remembers it.
+
+BANNER
+
 exec java $JAVA_OPTS -jar /app/lbc.jar "$@"

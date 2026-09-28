@@ -17,6 +17,20 @@ services:
       # Set this before exposing 7900 anywhere other than localhost.
       # LBC_VNC_PASSWORD: choose-something
       TZ: Europe/Paris
+
+      # How gently to ask. These are the numbers that decide whether the site
+      # treats you as a visitor or as a nuisance, and going faster does not
+      # collect more: it collects for less time, because a restricted address
+      # collects nothing at all. The defaults come from a browser that has been
+      # reading this kind of site daily for months.
+      LBC_PACE_CALL_MIN_MS: 1500          # shortest pause between two data calls
+      LBC_PACE_CALL_MAX_MS: 3500          # longest, picked at random in between
+      LBC_PACE_RENDER_MIN_MS: 6000        # between two page renders, which cost far more
+      LBC_PACE_RENDER_MAX_MS: 10000
+      LBC_PACE_CALLS_PER_MINUTE: 20       # ceiling, whatever the pauses say
+      LBC_PACE_PAGES_MAX: 20              # hard stop on pages per collection
+      LBC_PACE_RENDERED_PAGES_MAX: 3      # pages per call on the slow way in
+      LBC_MAX_ADS: 2000                   # hard stop on ads per search
     # Chromium is unhappy with a small /dev/shm and says so by crashing.
     shm_size: "1gb"
     restart: unless-stopped

@@ -28,7 +28,10 @@ public final class Walls {
             "verification de votre navigateur", "verify you are human",
             "verifying you are human", "enable javascript and cookies to continue",
             "attention required", "pardon our interruption",
-            "confirmez que vous etes un humain", "verifiez que vous etes");
+            "confirmez que vous etes un humain", "verifiez que vous etes",
+            // A restriction, which is not a check to pass but a pause to take.
+            "acces temporairement restreint", "temporairement restreint",
+            "votre acces a ce site", "access has been temporarily restricted");
 
     private static final List<String> CHALLENGE_FRAMES = List.of(
             "captcha-delivery", "recaptcha", "hcaptcha", "turnstile",
@@ -183,8 +186,29 @@ public final class Walls {
         l.click(new Locator.ClickOptions().setForce(true).setTimeout(4000));
     }
 
-    /** What to tell a human, in the words of what actually happened. */
+    /** Told apart because the way out is not the same. */
+    public static boolean isRestriction(String reason) {
+        String r = norm(reason);
+        return r.contains("restreint") || r.contains("restricted")
+                || r.contains("blocked") || r.contains("denied");
+    }
+
+    /**
+     * What to tell a human, in the words of what actually happened.
+     *
+     * <p>A check is passed with a click. A restriction is waited out, and clicking
+     * will not help: the address has been put on the naughty step, so the useful
+     * advice is to stop asking.
+     */
     public static String advice(String vncUrl, String reason, String attempt) {
+        if (isRestriction(reason)) {
+            return "The site has temporarily restricted access from this address ("
+                    + reason + "). This is not a check to pass, so opening the browser will"
+                    + " not help and neither will retrying: it would only make it worse, and"
+                    + " your other tools most likely share this address. Stop, leave it alone"
+                    + " for a while, and come back with a browser profile that has a real"
+                    + " session and a slower pace.";
+        }
         return "Anti robot check (" + reason + "). The tool " + attempt + ". "
                 + "Open " + vncUrl + ", pass the check by hand in the browser, then run the"
                 + " same tool again. Do not retry in a loop, and do not try to work around it:"
@@ -203,7 +227,17 @@ public final class Walls {
         }
     }
 
+    /**
+     * Lowercase and stripped of accents.
+     *
+     * <p>Worth its own method: the markers below are written without accents, and
+     * the page says "vérifiez". Comparing them raw meant half the French ones could
+     * never match, which is the quiet kind of bug that only shows up as a wall
+     * going unnoticed.
+     */
     private static String norm(String s) {
-        return s == null ? "" : s.toLowerCase(Locale.ROOT);
+        String t = java.text.Normalizer.normalize(s == null ? "" : s.toLowerCase(Locale.ROOT),
+                java.text.Normalizer.Form.NFKD);
+        return t.replaceAll("[^\\p{ASCII}]", "");
     }
 }

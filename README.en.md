@@ -47,6 +47,11 @@ Codex.
 
 Nothing to compile and no JDK to install: the image is built and published by CI.
 
+The first time, run `docker compose up` without `-d`: the container prints a
+short banner with both addresses and the state of the profile. Afterwards
+`docker compose logs lbc` shows it again at any time. Docker prints nothing from
+inside a detached container, which is a Docker limit rather than an oversight.
+
 **Once, at the beginning**, open <http://localhost:7900>. You are looking at the
 container's own browser, and this is where a human does the one thing no tool
 should: pass the anti robot check, and sign in if you want to.
@@ -209,9 +214,14 @@ Everything has a working default. Set what you need in `compose.yaml`.
 | `LBC_CDP_URL` | unset | Attach to a browser already running instead of starting one. |
 | `LBC_VNC_PASSWORD` | unset | Set this before exposing port 7900 anywhere but localhost. |
 | `LBC_VIEWER` | `on` | `off` skips the display and the viewer entirely. |
-| `LBC_MAX_PAGES` | `20` | Hard stop on pages per collection. |
+| `LBC_PACE_CALL_MIN_MS` | `1500` | Shortest pause between two data calls. |
+| `LBC_PACE_CALL_MAX_MS` | `3500` | Longest, picked at random in between. |
+| `LBC_PACE_RENDER_MIN_MS` | `6000` | Between two page renders, which cost the site far more. |
+| `LBC_PACE_RENDER_MAX_MS` | `10000` | Same, upper bound. |
+| `LBC_PACE_CALLS_PER_MINUTE` | `20` | Ceiling, whatever the pauses say. |
+| `LBC_PACE_PAGES_MAX` | `20` | Hard stop on pages per collection. |
+| `LBC_PACE_RENDERED_PAGES_MAX` | `3` | Pages per call on the slow way in. |
 | `LBC_MAX_ADS` | `2000` | Hard stop on ads per search. |
-| `LBC_CALLS_PER_MINUTE` | `20` | Our own pace limit. Being fast was never the point. |
 | `SERVER_PORT` | `8788` | Where MCP listens. |
 
 **Bring your own browser.** With `LBC_CDP_URL` pointing at a Chromium that is
@@ -248,6 +258,24 @@ your home.
 The raw object is what gets stored, not a compact view. The full description is in
 there anyway, and recomputing the view on read avoids stale columns the day the
 formula changes.
+
+**The pace is set in the compose file.** These are the numbers that decide whether
+the site treats you as a visitor or as a nuisance. The defaults come from a browser
+that has been reading this kind of site daily for months: one to three seconds
+between calls, six to ten between page renders. Going faster does not collect more,
+it collects for less time.
+
+## If access gets temporarily restricted
+
+It happens, and it was measured: a profile with no clearance that keeps pushing
+ends up seeing "access temporarily restricted". That is not a check to pass, it is
+a pause to take. Clicking will not help, and retrying makes it worse.
+
+The tool recognises it and words it differently from a plain wall: it asks you to
+stop rather than to go and click. Two things worth keeping in mind. Your address is
+probably shared with your other tools, so leaning on it from this container
+degrades what works elsewhere. And the way out is not a workaround: it is a profile
+with a real session and a slower pace.
 
 ## Development
 

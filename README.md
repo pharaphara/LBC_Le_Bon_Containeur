@@ -53,6 +53,12 @@ et Codex.
 Rien à compiler et aucun JDK à installer : l'image est construite et publiée par
 l'intégration continue.
 
+La première fois, lancez plutôt `docker compose up` sans `-d` : le conteneur
+affiche un message d'accueil avec les deux adresses et l'état du profil. Ensuite,
+`docker compose logs lbc` le redonne à tout moment. Docker n'affiche rien de
+l'intérieur d'un conteneur démarré en arrière-plan, c'est une limite de Docker et
+non un oubli.
+
 **Une fois, au début**, ouvrir <http://localhost:7900>. Vous regardez le navigateur
 du conteneur, et c'est là qu'un humain fait la seule chose qu'aucun outil ne
 devrait faire : passer le contrôle anti-robot, et se connecter au site si vous le
@@ -224,9 +230,14 @@ dans `compose.yaml`.
 | `LBC_CDP_URL` | vide | Se rattacher à un navigateur déjà lancé au lieu d'en démarrer un. |
 | `LBC_VNC_PASSWORD` | vide | À renseigner avant d'exposer le port 7900 ailleurs que sur la machine locale. |
 | `LBC_VIEWER` | `on` | `off` supprime l'affichage et le visualiseur. |
-| `LBC_MAX_PAGES` | `20` | Butée dure sur le nombre de pages par collecte. |
+| `LBC_PACE_CALL_MIN_MS` | `1500` | Pause la plus courte entre deux appels de données. |
+| `LBC_PACE_CALL_MAX_MS` | `3500` | La plus longue, tirée au hasard entre les deux. |
+| `LBC_PACE_RENDER_MIN_MS` | `6000` | Entre deux rendus de page, qui coûtent bien plus cher au site. |
+| `LBC_PACE_RENDER_MAX_MS` | `10000` | Idem, borne haute. |
+| `LBC_PACE_CALLS_PER_MINUTE` | `20` | Plafond, quoi que disent les pauses. |
+| `LBC_PACE_PAGES_MAX` | `20` | Butée dure sur le nombre de pages par collecte. |
+| `LBC_PACE_RENDERED_PAGES_MAX` | `3` | Pages par appel sur la voie lente. |
 | `LBC_MAX_ADS` | `2000` | Butée dure sur le nombre d'annonces par recherche. |
-| `LBC_CALLS_PER_MINUTE` | `20` | Notre propre cadence. Aller vite n'a jamais été le but. |
 | `SERVER_PORT` | `8788` | Le port d'écoute de MCP. |
 
 **Apportez votre navigateur.** Avec `LBC_CDP_URL` pointant sur un Chromium déjà
@@ -264,6 +275,24 @@ faire tourner le conteneur ailleurs tout en sortant de chez vous.
 C'est l'objet brut qui est stocké, pas une vue compacte. La description complète y
 est de toute façon, et recalculer la vue à la lecture évite des colonnes périmées le
 jour où la formule change.
+
+**La cadence se règle dans le compose.** Ce sont les nombres qui décident si le
+site vous voit comme un visiteur ou comme une nuisance. Les valeurs par défaut
+viennent d'un navigateur qui lit ce genre de site tous les jours depuis des mois :
+une à trois secondes entre deux appels, six à dix entre deux rendus de page. Aller
+plus vite ne collecte pas plus, ça collecte moins longtemps.
+
+## Si l'accès est temporairement restreint
+
+Ça arrive, et c'est mesuré : un profil sans validation qui insiste finit par voir
+« accès temporairement restreint ». Ce n'est pas un contrôle à passer, c'est une
+pause à prendre. Cliquer n'y changera rien, et réessayer aggrave les choses.
+
+L'outil le reconnaît et le dit autrement qu'un simple mur : il vous demande de vous
+arrêter, pas d'aller cliquer. Deux choses à garder en tête. Votre adresse est
+probablement partagée avec vos autres outils, donc insister depuis ce conteneur
+dégrade ce qui marche ailleurs. Et la sortie, ce n'est pas un contournement : c'est
+un profil avec une vraie session et une cadence plus lente.
 
 ## Développement
 

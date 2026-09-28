@@ -147,10 +147,17 @@ public class Lbc {
                     + " h ago. Pass refresh=true to collect again.");
         }
         String state = "ok";
+        String stop = str(pagination.get("stop"));
         if (meta.get("note") != null) {
-            state = "partial_structure";
             warnings.add(String.valueOf(meta.get("note")));
-        } else if (announced != null && announced == 0 && unique == 0
+            // Reading the rendered pages is a working way in, not a broken site. Only
+            // a structure nobody recognises deserves a state that says so, otherwise
+            // an assistant concludes the site changed when it simply went slower.
+            if (stop != null && stop.startsWith("unknown_structure")) {
+                state = "partial_structure";
+            }
+        }
+        if ("ok".equals(state) && announced != null && announced == 0 && unique == 0
                 && (text == null || text.isBlank()) && (criteria == null || criteria.isEmpty())) {
             state = "suspiciously_empty";
             warnings.add("the site announces zero ads and no filter explains it: the session may"

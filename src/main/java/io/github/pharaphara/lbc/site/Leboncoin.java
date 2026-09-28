@@ -136,7 +136,7 @@ public class Leboncoin {
         while (!calls.isEmpty() && now - calls.peekFirst() > 60_000) {
             calls.pollFirst();
         }
-        if (calls.size() >= props.callsPerMinute()) {
+        if (calls.size() >= props.pace().callsPerMinute()) {
             sleep(60_000 - (now - calls.peekFirst()) + 500);
         }
         calls.addLast(System.currentTimeMillis());
@@ -213,7 +213,9 @@ public class Leboncoin {
         int done = 0;
         String stop = "end";
 
-        for (int n = 1; n <= Math.max(1, Math.min(pages, props.maxPages())); n++) {
+        // And fewer pages per call than the fast path would take, for the same reason.
+        int ceilingPages = Math.max(1, Math.min(pages, Math.min(props.maxPages(), props.pace().renderedPagesMax())));
+        for (int n = 1; n <= ceilingPages; n++) {
             if (already + fresh >= cap) {
                 stop = "ceiling";
                 break;
@@ -241,12 +243,17 @@ public class Leboncoin {
                 break;
             }
             stop = "pages";
-            sleep(1200 + (long) (Math.random() * 1500));
+            // Far slower than the data calls on purpose. Rendering a whole page costs
+            // the site more than answering a query, and a profile with no clearance is
+            // precisely the one being watched. Going gently is not politeness here, it
+            // is what keeps the address out of trouble.
+            sleep(props.pace().renderPause());
         }
         String note = "the data calls were refused, which is what happens until a session exists,"
                 + " so the rendered pages were read instead: about 35 ads per page rather than 100,"
-                + " and one page render each. Sign in once at " + props.vncUrl()
-                + " and the fast path opens by itself.";
+                + " one page render each, and deliberately slow, at most three pages per call."
+                + " Keep leaning on this and the site will restrict the address for a while."
+                + " Pass the check once at " + props.vncUrl() + " and the fast path opens by itself.";
         return new Collected(done, 0, read, fresh, duplicates, outOfCategory, 0,
                 "rendered_pages:" + stop, note, first.totals(), first.search(), renderedFirst);
     }
@@ -364,7 +371,7 @@ public class Leboncoin {
                     break;
                 }
                 stop = "pages";
-                sleep(800 + (long) (Math.random() * 1200));
+                sleep(props.pace().callPause());
             }
             return new Collected(pageCount, callCount, read, fresh, duplicates, outOfCategory,
                     offset, stop, null, payload.totals(), query, rendered);
