@@ -44,12 +44,15 @@ public class Lbc {
     private final Query query;
     private final Leboncoin site;
     private final LbcProperties props;
+    private final io.github.pharaphara.lbc.browser.Browser browser;
 
-    public Lbc(Store store, Query query, Leboncoin site, LbcProperties props) {
+    public Lbc(Store store, Query query, Leboncoin site, LbcProperties props,
+               io.github.pharaphara.lbc.browser.Browser browser) {
         this.store = store;
         this.query = query;
         this.site = site;
         this.props = props;
+        this.browser = browser;
     }
 
     // ------------------------------------------------------------------ search
@@ -432,7 +435,7 @@ public class Lbc {
                 : "nothing to remove"), data);
     }
 
-    public Result status() {
+    public Result status(boolean askTheBrowser) {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("version", "0.1.0");
         data.put("browser", props.cdpUrl() == null || props.cdpUrl().isBlank()
@@ -446,6 +449,19 @@ public class Lbc {
         lines.add("lbc 0.1.0 | " + data.get("browser"));
         lines.add("searches on disk: " + data.get("searches") + " | autonomy: "
                 + data.get("autonomy"));
+        if (askTheBrowser) {
+            Map<String, Object> id = browser.identity();
+            data.put("identity", id);
+            lines.add("the browser says: webdriver " + id.get("webdriver")
+                    + " | " + id.get("languages") + " | " + id.get("cores") + " cores");
+            lines.add(String.valueOf(id.get("userAgent")));
+            if (Boolean.TRUE.equals(id.get("webdriver"))) {
+                lines.add("!! this browser announces that it is driven by software. Nothing here"
+                        + " hides that, and nothing will. A browser that somebody started and that"
+                        + " we merely talk to does not announce it, which is what LBC_CDP_URL is"
+                        + " for.");
+            }
+        }
         lines.add("if a tool reports a wall, open " + props.vncUrl()
                 + " and pass the check by hand once. The profile remembers the session,"
                 + " so signing in is a one time gesture too.");

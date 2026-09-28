@@ -235,10 +235,18 @@ public class Tools {
     @McpTool(name = "status", description = """
             How the container is set up: which browser it drives, where the data lives, and the
             address to open when a wall needs a human click. Worth calling once if a tool reports a
-            wall or an empty result you did not expect.""")
+            wall or an empty result you did not expect.
+
+            With browser=true it also asks the browser what it looks like from inside a page, which
+            costs no request to anyone and answers the question that matters when one setup sails
+            through and another gets stopped.""")
     public String status(
+            @McpToolParam(description = "Also ask the browser what it looks like from inside a"
+                    + " page: whether it announces being driven, its user agent, its languages."
+                    + " Reads a blank page, so it costs no request to anyone. Starts the browser"
+                    + " if it is not running yet.", required = false) Boolean browser,
             @McpToolParam(description = "\"text\" (default) or \"json\"", required = false) String format) {
-        return run(lbc::status, format);
+        return run(() -> lbc.status(Boolean.TRUE.equals(browser)), format);
     }
 
     // ------------------------------------------------------------------ plumbing

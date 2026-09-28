@@ -206,6 +206,30 @@ l'endroit où il s'arrête et vous renvoie vers <http://localhost:7900>. Un test
 impose tout cela : quinze motifs sont bannis du dépôt, et le détecteur est
 lui-même éprouvé contre un déguisement connu.
 
+## Comment le navigateur est démarré, et pourquoi ça compte plus que tout
+
+C'est la découverte la plus utile du projet, et elle a été mesurée en comparant ce
+conteneur à un navigateur qui lit ce genre de site tous les jours depuis des mois
+sans jamais se faire restreindre.
+
+| Vu depuis une page | Navigateur démarré par la bibliothèque | Navigateur démarré normalement |
+|---|---|---|
+| `navigator.webdriver` | `true` | `false` |
+| `navigator.plugins` | 0 | 5 |
+
+Laisser Playwright lancer le navigateur ajoute le drapeau d'automatisation, et la
+page le voit. Démarrer un navigateur de bureau ordinaire avec un port de débogage
+ouvert, puis simplement s'y rattacher, ne l'ajoute pas. C'était la seule différence
+structurelle entre les deux installations.
+
+C'est pourquoi l'image démarre Chromium elle-même et s'y rattache, et c'est ce que
+fait `LBC_BROWSER: attach`. Rien n'est falsifié et rien n'est masqué : un drapeau
+n'est simplement pas ajouté. On ne bricole pas `navigator`, on ne passe pas le
+fameux drapeau qui masque l'automatisation, et la différence tient uniquement à la
+façon de lancer le programme.
+
+`LBC_BROWSER: launch` rend l'ancien comportement, plus simple et plus bruyant.
+
 ## Rien en silence
 
 Chaque réduction est comptée et montrée, sur une ligne commençant par `!!`. Un

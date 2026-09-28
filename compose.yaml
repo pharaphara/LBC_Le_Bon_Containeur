@@ -31,6 +31,14 @@ services:
       LBC_PACE_PAGES_MAX: 20              # hard stop on pages per collection
       LBC_PACE_RENDERED_PAGES_MAX: 3      # pages per call on the slow way in
       LBC_MAX_ADS: 2000                   # hard stop on ads per search
+
+      # How the browser is driven. "attach" starts an ordinary desktop browser and
+      # talks to it, which is the only way it does not announce being automated.
+      # "launch" lets the library start it instead, which is simpler and louder.
+      LBC_BROWSER: attach
+      # What the browser says it reads. A tool aimed at a French marketplace saying
+      # it reads French is a locale setting, not a costume.
+      LBC_ACCEPT_LANG: "fr-FR,fr,en-US,en"
     # Chromium is unhappy with a small /dev/shm and says so by crashing.
     shm_size: "1gb"
     restart: unless-stopped

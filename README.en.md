@@ -191,6 +191,30 @@ checkbox. A puzzle is where it stops and tells you to look at
 <http://localhost:7900>. A test enforces all of this: fifteen patterns are banned
 from the source tree, and the scanner is itself tested against a known disguise.
 
+## How the browser is started, and why that matters more than anything
+
+This is the most useful thing this project learned, and it was measured by
+comparing this container against a browser that has been reading this kind of site
+daily for months without ever being restricted.
+
+| Seen from inside a page | Browser started by the library | Browser started normally |
+|---|---|---|
+| `navigator.webdriver` | `true` | `false` |
+| `navigator.plugins` | 0 | 5 |
+
+Letting Playwright launch the browser adds the automation flag, and the page can
+see it. Starting an ordinary desktop browser with a debugging port open, then
+merely attaching to it, does not. That was the only structural difference between
+the two setups.
+
+So the image starts Chromium itself and attaches to it, which is what
+`LBC_BROWSER: attach` does. Nothing is forged and nothing is hidden: a flag is
+simply not added. No `navigator` is patched, the well known flag that hides
+automation is still not passed, and the whole difference comes down to how the
+program is started.
+
+`LBC_BROWSER: launch` gives the old behaviour back, simpler and louder.
+
 ## Nothing silent
 
 Every reduction is counted and shown, on a line starting with `!!`. A criterion the

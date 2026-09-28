@@ -39,6 +39,41 @@ if [ "${LBC_VIEWER:-on}" != "off" ]; then
     websockify --web=/usr/share/novnc 7900 localhost:5900 >/dev/null 2>&1 &
 fi
 
+# Start Chromium the way a person would, then talk to it.
+#
+# This is the difference between a browser that announces being driven and one that
+# does not. Letting Playwright launch the browser adds the automation flag, and
+# navigator.webdriver comes back true. Starting an ordinary desktop browser with a
+# debugging port open, and merely attaching to it, leaves it false. Measured side by
+# side against a browser that has been reading this kind of site daily for months:
+# webdriver false there, true here, and that was the only structural difference.
+#
+# Nothing is forged and nothing is hidden. A flag is simply not added.
+if [ "${LBC_BROWSER:-attach}" = "attach" ] && [ -z "$LBC_CDP_URL_EXTERNAL" ]; then
+    CHROME=$(ls -d /browsers/chromium-*/chrome-linux*/chrome 2>/dev/null | head -1)
+    if [ -n "$CHROME" ]; then
+        "$CHROME" \
+            --remote-debugging-port=9222 \
+            --remote-allow-origins=* \
+            --user-data-dir="${LBC_PROFILE:-/profile}" \
+            --lang="${LBC_LANG:-fr-FR}" \
+            --accept-lang="${LBC_ACCEPT_LANG:-fr-FR,fr,en-US,en}" \
+            --window-size=1440,900 \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --no-first-run \
+            --no-default-browser-check \
+            about:blank >/dev/null 2>&1 &
+        i=0
+        while [ $i -lt 60 ]; do
+            if (exec 3<>/dev/tcp/127.0.0.1/9222) 2>/dev/null; then break; fi
+            i=$((i + 1))
+            sleep 0.5
+        done
+        export LBC_CDP_URL="${LBC_CDP_URL:-http://127.0.0.1:9222}"
+    fi
+fi
+
 # What an operator needs to know in the first five seconds, including the one thing
 # no software can do for them. Docker prints nothing from inside a container when
 # it is started detached, so this lands in the logs: "docker compose logs lbc", or
@@ -59,6 +94,7 @@ cat <<BANNER
   MCP       $MCP
   Browser   $VIEWER
   Profile   $PROFILE_STATE
+  Driving   ${LBC_CDP_URL:-launched by the library, which announces automation}
 
   Open the browser address once and pass the anti robot check by hand, and sign in
   if you want to. Nothing here forges a fingerprint or buys a captcha, so that one

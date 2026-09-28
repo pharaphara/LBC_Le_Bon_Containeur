@@ -2,6 +2,7 @@ package io.github.pharaphara.lbc.browser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
  * that is not enough a human clicks once.
  */
 @Component
+@SuppressWarnings("unchecked")
 public class Browser implements AutoCloseable {
 
     /** What a page looks like from the outside: enough to spot a wall. */
@@ -91,6 +93,9 @@ public class Browser implements AutoCloseable {
                         // A container has no sandbox helper, and a small /dev/shm.
                         "--no-sandbox", "--disable-dev-shm-usage"));
                 args.addAll(props.chromeArgs());
+                // Reached only when someone asked for it: the image starts an
+                // ordinary browser and attaches to it instead, because a launched
+                // one announces itself.
                 context = playwright.chromium().launchPersistentContext(props.profile(),
                         new BrowserType.LaunchPersistentContextOptions()
                                 .setHeadless(props.headless())
@@ -124,6 +129,33 @@ public class Browser implements AutoCloseable {
                     webKey = k;
                 }
             }
+        });
+    }
+
+    /**
+     * What this browser looks like from inside a page.
+     *
+     * <p>Read on a blank page, so it costs no request anywhere. Worth having: the
+     * difference between a browser somebody launched and a browser some code
+     * launched is visible from JavaScript, and it is the first thing to check when
+     * one setup sails through and another gets stopped.
+     */
+    public Map<String, Object> identity() {
+        return with(p -> {
+            if (p.url() == null || p.url().isBlank() || "about:blank".equals(p.url())) {
+                p.navigate("about:blank");
+            }
+            Object raw = p.evaluate("""
+                    () => ({
+                      webdriver: navigator.webdriver,
+                      userAgent: navigator.userAgent,
+                      languages: (navigator.languages || []).join(','),
+                      plugins: (navigator.plugins || []).length,
+                      cores: navigator.hardwareConcurrency,
+                      platform: navigator.platform
+                    })""");
+            return raw instanceof Map<?, ?> m ? new java.util.LinkedHashMap<String, Object>(
+                    (Map<String, Object>) m) : new java.util.LinkedHashMap<String, Object>();
         });
     }
 
