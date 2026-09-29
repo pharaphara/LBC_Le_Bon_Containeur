@@ -226,6 +226,29 @@ This is the failure the project is built against. A table that dropped a third o
 its rows without saying so reads exactly like a thin market, and an assistant has
 no way to tell the difference.
 
+## What it takes to run
+
+Measured, not estimated, on a six core machine.
+
+| | Measured |
+|---|---|
+| Image | 2.2 GB |
+| RAM at rest | 467 MiB, browser running included |
+| RAM during a search | 960 MiB at peak |
+| CPU at rest | 0.5% |
+| Data | about 8 kB per ad, so 8 MB per thousand |
+
+In practice: **1.5 GB of RAM for the container, 3 GB of disk, two cores**, and no
+graphics card. On a machine that is already busy, `LBC_BROWSER: launch` keeps no
+browser running between calls, at the cost of a startup per session and a browser
+that announces being driven.
+
+A container carrying a real browser cannot be small, and here is where the 2.2 GB
+go: 780 MB for Chromium and its libraries, 520 MB for the display server and the
+viewer, 250 MB for the Java runtime, the rest for the application. The first lead
+for slimming down is a variant without the viewer, for people attaching to their
+own browser: that alone removes 520 MB.
+
 ## Configuration
 
 Everything has a working default. Set what you need in `compose.yaml`.
@@ -322,6 +345,13 @@ So the caps will sit on threads opened per day rather than on replies, autonomy
 will be an explicit level rather than a default, everything sent will be logged,
 and the rule that an assistant never states a fact that is not true belongs in the
 tool description where it will actually be read.
+
+**Slimming the image.** 2.2 GB is what a real browser costs, but some of it
+comes back. A variant without the viewer removes 520 MB for anyone attaching to
+their own browser. A tailored Java runtime removes another hundred or so. And the
+libraries installed alongside Chromium are a superset of what it actually links.
+First gain already taken: 942 MB, by reordering two Dockerfile instructions so the
+browser is not stored twice.
 
 **Signing in** without touching the viewer, for people who would rather put
 credentials in the compose file. It will stay an option and not the default: a

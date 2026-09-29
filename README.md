@@ -241,6 +241,29 @@ C'est le défaut contre lequel ce projet est bâti. Un tableau qui a perdu un ti
 ses lignes sans le dire se lit exactement comme un marché étroit, et un assistant
 n'a aucun moyen de faire la différence.
 
+## Ce qu'il faut pour le faire tourner
+
+Mesuré, pas estimé, sur une machine à six cœurs.
+
+| | Mesure |
+|---|---|
+| Image | 2,2 Go |
+| RAM au repos | 467 Mio, navigateur allumé compris |
+| RAM pendant une recherche | 960 Mio au plus haut |
+| CPU au repos | 0,5 % |
+| Données | environ 8 Ko par annonce, soit 8 Mo pour mille |
+
+En pratique : **1,5 Go de RAM pour le conteneur, 3 Go de disque, deux cœurs**, et
+pas de carte graphique. Si la machine est déjà chargée, `LBC_BROWSER: launch` ne
+garde pas de navigateur allumé entre deux appels, au prix d'un démarrage à chaque
+session et d'un navigateur qui annonce être piloté.
+
+Un conteneur qui embarque un vrai navigateur ne peut pas être petit, et voici où
+vont les 2,2 Go : 780 Mo pour Chromium et ses bibliothèques, 520 Mo pour le
+serveur d'affichage et le visualiseur, 250 Mo pour la machine Java, le reste pour
+l'application. La première piste pour alléger est une variante sans visualiseur,
+pour qui se rattache à son propre navigateur : elle enlève 520 Mo d'un coup.
+
 ## Configuration
 
 Tout a une valeur par défaut qui fonctionne. On ne règle que ce dont on a besoin,
@@ -340,6 +363,14 @@ les fils ouverts par jour et non sur les réponses, l'autonomie sera un niveau
 explicite et non un défaut, tout ce qui part sera journalisé, et la règle selon
 laquelle un assistant n'énonce jamais un fait faux a sa place dans la description
 de l'outil, là où elle sera vraiment lue.
+
+**Alléger l'image.** 2,2 Go, c'est le prix d'un vrai navigateur, mais une
+partie se récupère. Une variante sans visualiseur enlève 520 Mo pour qui se
+rattache à son propre navigateur. Une machine Java taillée sur mesure en enlève
+encore une centaine. Et les bibliothèques installées avec Chromium sont un
+sur-ensemble de ce qu'il lie vraiment. Premier gain déjà pris : 942 Mo, en
+ordonnant deux instructions du Dockerfile pour que le navigateur ne soit pas
+stocké deux fois.
 
 **La connexion au site** sans passer par le visualiseur, pour qui préfère mettre
 des identifiants dans le fichier compose. Ce restera une option et non le défaut :

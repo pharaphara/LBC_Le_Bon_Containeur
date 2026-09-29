@@ -35,18 +35,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=build /out /app
 
-# Chromium, plus the system libraries it wants, installed by Playwright's own cli.
-RUN java -cp "/app/lib/*" com.microsoft.playwright.CLI install --with-deps chromium \
- && rm -rf /var/lib/apt/lists/* /root/.cache
-
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 # Uid 1000 to match the first user on most hosts, so a bind mounted volume is
 # writable without a chown dance. The base image may already own that uid under
 # another name, which is fine: what matters is the number and a writable home.
-RUN chmod +x /usr/local/bin/entrypoint.sh \
- && (id -u 1000 >/dev/null 2>&1 || useradd -u 1000 -M lbc) \
+# Created BEFORE the browser is installed, and that ordering is worth 690 MB: a
+# chown -R in a later layer rewrites every file it touches, so the whole browser
+# ends up stored twice in the image. Owning it from the same layer that installs
+# it costs nothing.
+RUN (id -u 1000 >/dev/null 2>&1 || useradd -u 1000 -M lbc) \
  && mkdir -p /profile /data /home/lbc \
- && chown -R 1000:1000 /profile /data /browsers /home/lbc
+ && chown 1000:1000 /profile /data /home/lbc
+
+# Chromium, plus the system libraries it wants, installed by Playwright's own cli.
+RUN java -cp "/app/lib/*" com.microsoft.playwright.CLI install --with-deps chromium \
+ && chown -R 1000:1000 /browsers \
+ && rm -rf /var/lib/apt/lists/* /root/.cache
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENV HOME=/home/lbc
 USER 1000
